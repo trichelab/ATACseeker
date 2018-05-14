@@ -36,8 +36,7 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19", plotMAPQ=FALSE) {
 
   mtParam <- ScanBamParam(flag=flags, what=c("seq","mapq")) 
   mtReads <- suppressWarnings(readGAlignments(mtView, param=mtParam)[[1]])
-  mtReadLength <- median(width(mcols(mtReads)$seq))
-  attr(mtReads, "mtReadLength") <- mtReadLength
+  mtReadLength <- median(width(mcols(mtReads)$seq)) - 1 
   attr(mtReads, "mtFrac") <- mtFrac
   genome(mtReads) <- mtGenome
   mtReads <- keepSeqlevels(mtReads, chrM)
@@ -51,6 +50,7 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19", plotMAPQ=FALSE) {
          main=paste("Mitochondrial read mapping quality for\n", bam))
   }
 
-  return(mtReads)
+  # MAlignments == wrapped GAlignments, but showing coverage
+  return(MAlignments(mtReads, mtReadLength, width(mtRange)))
 
 }
