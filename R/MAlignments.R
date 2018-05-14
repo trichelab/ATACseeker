@@ -11,7 +11,7 @@ setClass("MAlignments",
 #'
 #' @param gal         a GAlignments
 #' @param readLength  a number (read length)
-#' @param genomeSize  a number (number of bases in the mitochondrial genome)
+#' @param genomeSize  a number (number of bases in the host genome)
 #'
 #' @return an MAlignments 
 #' 
@@ -34,5 +34,5 @@ setMethod("show", signature(object="MAlignments"),
             callNextMethod()
             cat("  -------\n")
             cat(paste0("  ", round(coverage(object)), 
-                       "x approximate mtDNA read coverage."), "\n")
+                       "x approximate read coverage."), "\n")
           })

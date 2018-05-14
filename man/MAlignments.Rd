@@ -11,7 +11,7 @@ MAlignments(gal, readLength = 75, genomeSize = 16571)
 
 \item{readLength}{a number (read length)}
 
-\item{genomeSize}{a number (number of bases in the mitochondrial genome)}
+\item{genomeSize}{a number (number of bases in the host genome)}
 }
 \value{
 an MAlignments
