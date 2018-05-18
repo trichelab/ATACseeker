@@ -24,3 +24,7 @@ in the cell type assayed; leukocytes usually have between 100-500, while
 hepatocytes can have thousands. Therefore different settings make sense
 for different cell types. The defaults call a mutation with ~ 2% VAF.
 }
+\details{
+FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,
+       regardless of what reference they were originally aligned against.
+}

@@ -6,6 +6,9 @@
 #' hepatocytes can have thousands. Therefore different settings make sense
 #' for different cell types. The defaults call a mutation with ~ 2% VAF.
 #'
+#' FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,
+#'        regardless of what reference they were originally aligned against.
+#' 
 #' @param mtReads     mitochondrial reads, with bamViews, or a BAM filename
 #' @param p.lower     lower bound on binomial probability for a variant (0.1)
 #' @param p.error     error probability (influences the minimum VAF; 0.001)
@@ -61,6 +64,8 @@ callMT <- function(mtReads, p.lower=0.1, p.error=0.001, read.count=2L, ...) {
 
 # hg19, hg38, and GRCh38 mitochondrial genome creation for gmapR
 # (any genome with a FASTA of the MT contig can be processed similarly)
+#
+# See inst/exdata/mitomes/rCRS.fasta and inst/exdata/mitomes/rCRS.R 
 #
 if (FALSE) { 
 

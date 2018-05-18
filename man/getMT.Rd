@@ -2,9 +2,7 @@
 % Please edit documentation in R/getMT.R
 \name{getMT}
 \alias{getMT}
-\title{grab the mitochondrial reads from a BAM and estimate their fraction
-nb. this could probably be done faster for a list of BAMs but it's not
-nb. nb. returns NuMt-depleted mitochondrial GenomicAlignments}
+\title{grab the mitochondrial reads from a BAM and estimate their fraction}
 \usage{
 getMT(bam, chrM = "chrM", mtGenome = "hg19", plotMAPQ = FALSE)
 }
@@ -18,7 +16,7 @@ getMT(bam, chrM = "chrM", mtGenome = "hg19", plotMAPQ = FALSE)
 \item{plotMAPQ}{plot distribution of mitochondrial mapping quality? (FALSE)}
 }
 \description{
-grab the mitochondrial reads from a BAM and estimate their fraction
 nb. this could probably be done faster for a list of BAMs but it's not
 nb. nb. returns NuMt-depleted mitochondrial GenomicAlignments
+FIXME: liftOver hg18/hg19-aligned results to rCRS for better variant calls
 }

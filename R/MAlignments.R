@@ -1,10 +1,13 @@
-#' wraps a GAlignments with coverage information
+#' wraps a GAlignments with coverage information and a BamView of its target
+#' 
+#' @import Rsamtools
 #' 
 #' @exportClass MAlignments
 setClass("MAlignments",
          # for calculating coverage: 
          representation(readLength="integer", 
-                        genomeSize="integer"),
+                        genomeSize="integer",
+                        mtView="BamViews"),
          contains="GAlignments")
 
 #' wrap a GAlignments for easier stats

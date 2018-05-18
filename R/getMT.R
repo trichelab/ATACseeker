@@ -1,7 +1,9 @@
 #' grab the mitochondrial reads from a BAM and estimate their fraction
+#'
 #' nb. this could probably be done faster for a list of BAMs but it's not
 #' nb. nb. returns NuMt-depleted mitochondrial GenomicAlignments
-#'
+#' FIXME: liftOver hg18/hg19-aligned results to rCRS for better variant calls
+#' 
 #' @param bam       a BAM filename, which should have an index (else index it)
 #' @param chrM      what the mitochondrial contig is called. Default is "chrM" 
 #' @param mtGenome  what mitochondrial assembly was used (default is hg19) 

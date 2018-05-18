@@ -2,6 +2,7 @@
 
 export(MAlignments)
 export(addMtGeneLabel)
+export(assignHaplogroup)
 export(callMT)
 export(collectStats)
 export(fragPlot)
