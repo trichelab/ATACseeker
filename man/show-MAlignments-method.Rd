@@ -3,7 +3,7 @@
 \docType{methods}
 \name{show,MAlignments-method}
 \alias{show,MAlignments-method}
-\title{display alignment records with overall coverage estimate}
+\title{display alignment records with read coverage estimate}
 \usage{
 \S4method{show}{MAlignments}(object)
 }
@@ -11,5 +11,5 @@
 \item{x}{an MAlignments}
 }
 \description{
-display alignment records with overall coverage estimate
+display alignment records with read coverage estimate
 }

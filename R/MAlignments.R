@@ -4,41 +4,23 @@
 #' 
 #' @exportClass MAlignments
 setClass("MAlignments",
-         # for calculating coverage: 
-         representation(readLength="integer", 
-                        genomeSize="integer",
-                        bam="character",
-                        bai="character",
-                        gr="GRanges"),
+         representation(bam="character"), 
          contains="GAlignments")
 
 #' wrap a GAlignments for easier stats
 #'
 #' @param gal         a GAlignments
-#' @param gr          a GRanges (mtRanges)
 #' @param bam         a bam filename
-#' @param bai         a bai filename
-#' @param readLength  a number (read length)
-#' @param genomeSize  a number (number of bases in the host genome)
 #'
 #' @return an MAlignments 
 #' 
 #' @import GenomicAlignments
 #' 
 #' @export
-MAlignments <- function(gal, gr, bam, bai, readLength=75, genomeSize=16571) {
+MAlignments <- function(gal, bam) { 
   if (!is(gal, "GAlignments")) stop("gal must be a GAlignments. Exiting.")
-  if (!is(gr, "GRanges")) stop("gr must be a GRanges. Exiting.")
   if (length(bam) > 1) stop("bam must be a string. Exiting.")
-  if (length(bai) > 1) stop("bai must be a string. Exiting.")
-  if (length(readLength) > 1) stop("readLength must be an integer. Exiting.")
-  if (length(genomeSize) > 1) stop("genomeSize must be an integer. Exiting.")
-  new("MAlignments", gal, 
-      readLength=as.integer(readLength), 
-      genomeSize=as.integer(genomeSize),
-      bam=bam,
-      bai=bai,
-      gr=gr)
+  new("MAlignments", gal, bam=bam)
 }
 
 #' estimated read coverage
@@ -49,9 +31,13 @@ MAlignments <- function(gal, gr, bam, bai, readLength=75, genomeSize=16571) {
 #'
 #' @export
 setMethod("coverage", signature(x="MAlignments"),
-          function(x) (length(x) * x@readLength) / x@genomeSize)
+          function(x) {
+            readLength <- median(qwidth(x)) - 1
+            genomeSize <- width(as(seqinfo(x)[seqlevelsInUse(x)], "GRanges"))
+            return((length(x) * readLength) / genomeSize)
+          })
 
-#' display alignment records with overall coverage estimate
+#' display alignment records with read coverage estimate
 #'
 #' @param x   an MAlignments
 #' 
@@ -62,23 +48,6 @@ setMethod("show", signature(object="MAlignments"),
             cat("  -------\n")
             cat(paste0("  ", round(coverage(object)), 
                        "x approximate read coverage."), "\n")
-          })
-
-#' retrieve the rest of the stored information in an MAlignments object
-#'
-#' @param x   an MAlignments
-#' 
-#' @return    a list of metadata (gr, bam, bai, readLength, genomeSize)
-#'
-#' @export
-setMethod("metadata", signature(x="MAlignments"),
-          function(x) {
-            mdat <- list(gr=x@gr, 
-                         bam=x@bam, 
-                         bai=x@bai, 
-                         readLength=x@readLength,
-                         genomeSize=x@genomeSize)
-            return(mdat)
           })
 
 #' recreate the BamViews needed to call variants 
@@ -92,7 +61,10 @@ setMethod("metadata", signature(x="MAlignments"),
 #' @export
 setMethod("Views", signature(subject="MAlignments"),
           function(subject) {
-            with(metadata(subject), BamViews(bam, bai, bamRanges=gr))
+            bam <- subject@bam
+            bai <- paste0(bam, ".bai")
+            bamRanges <- as(seqinfo(subject)[seqlevelsInUse(subject)],"GRanges")
+            BamViews(bam=bam, bai=bai, bamRanges=bamRanges)
           })
 
 #' call variants (shockingly enough) 
