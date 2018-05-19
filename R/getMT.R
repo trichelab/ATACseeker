@@ -38,13 +38,10 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19", plotMAPQ=FALSE) {
 
   mtParam <- ScanBamParam(flag=flags, what=c("seq","mapq")) 
   mtReads <- suppressWarnings(readGAlignments(mtView, param=mtParam)[[1]])
-  mtReadLength <- median(width(mcols(mtReads)$seq)) - 1 
   attr(mtReads, "mtFrac") <- mtFrac
   genome(mtReads) <- mtGenome
   mtReads <- keepSeqlevels(mtReads, chrM)
   isCircular(seqinfo(mtReads)) <- TRUE 
-  seqinfo(bamRanges(mtView)) <- seqinfo(mtReads)[seqlevels(bamRanges(mtView))]
-  attr(mtReads, "mtView") <- mtView
 
   if (plotMAPQ) {
     plot(density(mcols(mtReads)$mapq), type="h", col="red",
@@ -53,12 +50,6 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19", plotMAPQ=FALSE) {
   }
 
   # MAlignments == wrapped GAlignments
-  mal <- MAlignments(gal=mtReads, 
-                     gr=mtRange,
-                     bam=bam,
-                     bai=bai,
-                     readLength=mtReadLength,
-                     genomeSize=seqlengths(mtReads)[chrM])
-  return(mal)
+  return(MAlignments(gal=mtReads, bam=bam))
 
 }
