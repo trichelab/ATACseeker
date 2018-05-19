@@ -1,7 +1,7 @@
 Package: ATACseeker
 Type: Package
 Title: Utilities for ATACseq QC, differential accessibility, and integration
-Version: 0.9.13
+Version: 0.9.15
 Date: 2018-05-19
 Author: Tim Triche, Jr., Asif Zubair, Ben Johnson
 Maintainer: Tim Triche, Jr. <tim.triche@gmail.com>
@@ -12,6 +12,7 @@ Depends:
     VariantTools,
     rtracklayer,
     ggthemes,
+    chromVAR,
     preseqR,
     ggplot2,
     gmapR,
