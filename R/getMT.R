@@ -52,7 +52,13 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19", plotMAPQ=FALSE) {
          main=paste("Mitochondrial read mapping quality for\n", bam))
   }
 
-  # MAlignments == wrapped GAlignments, but showing coverage
-  return(MAlignments(mtReads, mtReadLength, width(mtRange)))
+  # MAlignments == wrapped GAlignments
+  mal <- MAlignments(gal=mtReads, 
+                     gr=mtRange,
+                     bam=bam,
+                     bai=bai,
+                     readLength=mtReadLength,
+                     genomeSize=seqlengths(mtReads)[chrM])
+  return(mal)
 
 }

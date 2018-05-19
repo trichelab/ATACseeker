@@ -3,7 +3,7 @@
 \docType{class}
 \name{MAlignments-class}
 \alias{MAlignments-class}
-\title{wraps a GAlignments with coverage information and a BamView of its target}
+\title{wraps a GAlignments with information about coverage and its target BAM file}
 \description{
-wraps a GAlignments with coverage information and a BamView of its target
+wraps a GAlignments with information about coverage and its target BAM file
 }

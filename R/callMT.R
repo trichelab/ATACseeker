@@ -25,19 +25,17 @@
 callMT <- function(mtReads, p.lower=0.1, p.error=0.001, read.count=2L, ...) { 
   
   if (is(mtReads, "character")) mtReads <- getMT(mtReads)
+  if (!is(mtReads, "MAlignments")) {
+    stop("Need an 'enhanced' MAlignments result from getMT() for this to work.")
+  }
   mtGenome <- unique(genome(mtReads))
   mtChr <- unique(names(genome(mtReads)))
-  if (length(mtGenome)>1 | length(mtChr)>1 | is.null(attr(mtReads,"mtView"))) {
-    stop("Need an 'enhanced' GAlignments result from getMT() for this to work.")
-  }
   gmapGenome <- paste("GmapGenome", "Hsapiens", mtGenome, mtChr, sep=".")
   requireNamespace(gmapGenome)
   try(attachNamespace(gmapGenome), silent=TRUE)
-  whichRanges <- as(seqinfo(get(gmapGenome)), "GRanges")
-  bam <- bamPaths(attr(mtReads, "mtView"))
-
-  # recently TallyVariants has become picky about this:
-  readLen <- as(attr(mtReads, "mtReadLength"), "integer")
+  bam <- bamPaths(mtView(mtReads))
+  readLen <- mtReads@readLength
+  whichRanges <- bamRanges(BamViews(bam, bai, bamRanges = mtRange))
 
   # FIXME: use a mask= argument to black out hypervariable region?
   tally.param <- TallyVariantsParam(get(gmapGenome),

@@ -4,10 +4,16 @@
 \alias{MAlignments}
 \title{wrap a GAlignments for easier stats}
 \usage{
-MAlignments(gal, readLength = 75, genomeSize = 16571)
+MAlignments(gal, gr, bam, bai, readLength = 75, genomeSize = 16571)
 }
 \arguments{
 \item{gal}{a GAlignments}
+
+\item{gr}{a GRanges (mtRanges)}
+
+\item{bam}{a bam filename}
+
+\item{bai}{a bai filename}
 
 \item{readLength}{a number (read length)}
 
