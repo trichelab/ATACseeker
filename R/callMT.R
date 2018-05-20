@@ -41,11 +41,11 @@ callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
   res <- subset(res, totalDepth >= total.count)
   res$VAF <- altDepth(res) / totalDepth(res)
   genome(res) <- mtGenome
-  mr <- MRanges(res, coverage(mal))
+  mvr <- MVRanges(res, coverage(mal))
   if (rCRS == TRUE & (!mtGenome %in% c("GRCh38","hg38"))) {
-    mr <- rCRS(mr)
+    mvr <- rCRS(mvr)
   } else { 
-    names(mr) <- paste0(as.character(mr), ":", ref(mr), ">", alt(mr))
+    names(mvr) <- paste0(as.character(mvr), ":", ref(mvr), ">", alt(mvr))
   }
-  return(mr)
+  return(mvr)
 }

@@ -4,13 +4,13 @@
 \alias{rCRS}
 \title{liftOver and simplify an hg19 mitochondrial genome (variants) to rCRS}
 \usage{
-rCRS(mr)
+rCRS(mvr)
 }
 \arguments{
-\item{mr}{an MRanges of variant calls}
+\item{mvr}{an MVRanges of variant calls}
 }
 \value{
-an MRanges of variant calls against rCRS
+an MVRanges of variant calls against rCRS
 }
 \description{
 liftOver and simplify an hg19 mitochondrial genome (variants) to rCRS

@@ -1,21 +1,23 @@
 #' liftOver and simplify an hg19 mitochondrial genome (variants) to rCRS 
 #'
-#' @param mr    an MRanges of variant calls
+#' @param mvr   an MVRanges of variant calls
 #'
-#' @return      an MRanges of variant calls against rCRS 
+#' @return      an MVRanges of variant calls against rCRS 
 #' 
 #' @import rtracklayer
 #'
 #' @export
-rCRS <- function(mr) { 
-  mtGenome <- unique(genome(mr))
+rCRS <- function(mvr) { 
+  mtGenome <- unique(genome(mvr))
   if (mtGenome %in% c("GRCh38","hg38")) {
-    message("This MRanges is already against rCRS.")
-    return(mr)
+    message("This MVRanges is already against rCRS.")
+    return(mvr)
   } else { 
     data(hg19TorCRS) 
-    mr <- sort(unlist(liftOver(mr, hg19TorCRS)))
-    names(mr) <- paste0(as.character(mr), ":", ref(mr), ">", alt(mr))
-    return(mr)
+    mvr <- sort(unlist(liftOver(mvr, hg19TorCRS)))
+    names(mvr) <- paste0(as.character(mvr), ":", ref(mvr), ">", alt(mvr))
+    # some variants called against hg19 chrM are really just the rCRS itself 
+    message("Warning: 'cleanup' of hg19-to-rCRS artifactual 'SNPs' is not done")
+    return(mvr)
   }
 }
