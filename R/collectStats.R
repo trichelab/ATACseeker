@@ -11,6 +11,5 @@ collectStats <- function(curbam, pe.param) {
   rsums <- rowSums(assays(wcnt)$counts)
   maxed <- findMaxima(rowRanges(wcnt), range=1000, metric=rsums)
   rmax <- rowRanges(wcnt)[maxed]
-  weight <- 1 / rsums[maxed]
-  profileSites(curbam, rmax, param=pe.param, weight=weight)
+  profileSites(curbam, rmax, param=pe.param)
 }
