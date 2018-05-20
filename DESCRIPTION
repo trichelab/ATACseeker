@@ -1,8 +1,8 @@
 Package: ATACseeker
 Type: Package
 Title: Utilities for ATACseq QC, differential accessibility, and integration
-Version: 0.9.16
-Date: 2018-05-19
+Version: 0.9.17
+Date: 2018-05-20
 Author: Tim Triche, Jr., Asif Zubair, Ben Johnson
 Maintainer: Tim Triche, Jr. <tim.triche@gmail.com>
 Description: Some ATACseq tools with marginal documentation
@@ -20,7 +20,6 @@ Depends:
 Imports:
     Rsamtools,
     GenomicRanges,
-    GenomicAlignments,
-    mclust
+    GenomicAlignments
 License: Artistic
 RoxygenNote: 6.0.1

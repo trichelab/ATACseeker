@@ -4,7 +4,8 @@
 \alias{callMT}
 \title{call mitochondrial variants from an MAlignments object}
 \usage{
-callMT(mal, p.lower = 0.1, read.count = 2L, total.count = 10)
+callMT(mal, p.lower = 0.1, read.count = 2L, total.count = 10L,
+  rCRS = FALSE)
 }
 \arguments{
 \item{mal}{an MAlignments}
@@ -14,9 +15,11 @@ callMT(mal, p.lower = 0.1, read.count = 2L, total.count = 10)
 \item{read.count}{minimum alt read depth required to support a variant (2)}
 
 \item{total.count}{minimum total read depth required to keep a variant (10)}
+
+\item{rCRS}{lift to rCRS if not already hg38/GRCh38? (FALSE)}
 }
 \description{
-FIXME: use a mask= argument to black out the hypervariable region?
+FIXME: use a mask= argument to black out the hypervariable regions?
 }
 \details{
 FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,

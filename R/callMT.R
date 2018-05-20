@@ -1,6 +1,6 @@
 #' call mitochondrial variants from an MAlignments object 
 #'
-#' FIXME: use a mask= argument to black out the hypervariable region?
+#' FIXME: use a mask= argument to black out the hypervariable regions?
 #'
 #' FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,
 #'        regardless of what reference they were originally aligned against.
@@ -9,6 +9,7 @@
 #' @param p.lower     lower bound on binomial probability for a variant (0.1)
 #' @param read.count  minimum alt read depth required to support a variant (2)
 #' @param total.count minimum total read depth required to keep a variant (10)
+#' @param rCRS        lift to rCRS if not already hg38/GRCh38? (FALSE) 
 #'
 #' @import gmapR
 #' @import VariantTools
@@ -16,7 +17,7 @@
 #' @import GmapGenome.Hsapiens.hg19.chrM
 #'
 #' @export
-callMT <- function(mal, p.lower=0.1, read.count=2L, total.count=10) { 
+callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
   if (!is(mal, "MAlignments")) stop("callMT needs an MAlignments to work.")
   mtChr <- seqlevelsInUse(mal)
   mtGenome <- unique(genome(mal))
@@ -37,9 +38,14 @@ callMT <- function(mal, p.lower=0.1, read.count=2L, total.count=10) {
   sampleNames(res) <- gsub(paste0(".", mtGenome), "", 
                            gsub("\\.bam", "", basename(mal@bam)))
   res$PASS <- apply(softFilterMatrix(res), 1, all) == 1
-  res <- res[rev(order(res$PASS, totalDepth(res)))]
   res <- subset(res, totalDepth >= total.count)
   res$VAF <- altDepth(res) / totalDepth(res)
   genome(res) <- mtGenome
-  return(MRanges(res, coverage(mal)))
+  mr <- MRanges(res, coverage(mal))
+  if (rCRS == TRUE & (!mtGenome %in% c("GRCh38","hg38"))) {
+    mr <- rCRS(mr)
+  } else { 
+    names(mr) <- paste0(as.character(mr), ":", ref(mr), ">", alt(mr))
+  }
+  return(mr)
 }
