@@ -2,27 +2,21 @@
 % Please edit documentation in R/callMT.R
 \name{callMT}
 \alias{callMT}
-\title{call mitochondrial variants from the results of ATACseeker::getMT()}
+\title{call mitochondrial variants from an MAlignments object}
 \usage{
-callMT(mtReads, p.lower = 0.1, p.error = 0.001, read.count = 2L, ...)
+callMT(mal, p.lower = 0.1, read.count = 2L, total.count = 10)
 }
 \arguments{
-\item{mtReads}{mitochondrial reads, with bamViews, or a BAM filename}
+\item{mal}{an MAlignments}
 
 \item{p.lower}{lower bound on binomial probability for a variant (0.1)}
 
-\item{p.error}{error probability (influences the minimum VAF; 0.001)}
+\item{read.count}{minimum alt read depth required to support a variant (2)}
 
-\item{read.count}{minimum read depth required to support a variant (2)}
-
-\item{...}{any other arguments to pass (currently ignored)}
+\item{total.count}{minimum total read depth required to keep a variant (10)}
 }
 \description{
-call mitochondrial variants against the reference sequence they aligned to
-the appropriate cutoffs will depend on the estimated copy number of mtDNA
-in the cell type assayed; leukocytes usually have between 100-500, while
-hepatocytes can have thousands. Therefore different settings make sense
-for different cell types. The defaults call a mutation with ~ 2% VAF.
+FIXME: use a mask= argument to black out the hypervariable region?
 }
 \details{
 FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,

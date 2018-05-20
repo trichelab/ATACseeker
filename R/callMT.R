@@ -1,96 +1,45 @@
-#' call mitochondrial variants from the results of ATACseeker::getMT() 
+#' call mitochondrial variants from an MAlignments object 
 #'
-#' call mitochondrial variants against the reference sequence they aligned to
-#' the appropriate cutoffs will depend on the estimated copy number of mtDNA
-#' in the cell type assayed; leukocytes usually have between 100-500, while
-#' hepatocytes can have thousands. Therefore different settings make sense
-#' for different cell types. The defaults call a mutation with ~ 2% VAF.
+#' FIXME: use a mask= argument to black out the hypervariable region?
 #'
 #' FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,
 #'        regardless of what reference they were originally aligned against.
 #' 
-#' @param mtReads     mitochondrial reads, with bamViews, or a BAM filename
+#' @param mal         an MAlignments 
 #' @param p.lower     lower bound on binomial probability for a variant (0.1)
-#' @param p.error     error probability (influences the minimum VAF; 0.001)
-#' @param read.count  minimum read depth required to support a variant (2)
-#' @param ...         any other arguments to pass (currently ignored)
+#' @param read.count  minimum alt read depth required to support a variant (2)
+#' @param total.count minimum total read depth required to keep a variant (10)
 #'
 #' @import gmapR
 #' @import VariantTools
+#' @import GenomicAlignments
 #' @import GmapGenome.Hsapiens.hg19.chrM
-#' @import GmapGenome.Hsapiens.hg38.chrM
-#' @import GmapGenome.Hsapiens.GRCh38.MT
 #'
 #' @export
-callMT <- function(mtReads, p.lower=0.1, p.error=0.001, read.count=2L, ...) { 
-  
-  if (is(mtReads, "character")) mtReads <- getMT(mtReads)
-  if (!is(mtReads, "MAlignments")) {
-    stop("Need an 'enhanced' MAlignments result from getMT() for this to work.")
-  }
-  mtGenome <- unique(genome(mtReads))
-  mtChr <- unique(names(genome(mtReads)))
+callMT <- function(mal, p.lower=0.1, read.count=2L, total.count=10) { 
+  if (!is(mal, "MAlignments")) stop("callMT needs an MAlignments to work.")
+  mtChr <- seqlevelsInUse(mal)
+  mtGenome <- unique(genome(mal))
   gmapGenome <- paste("GmapGenome", "Hsapiens", mtGenome, mtChr, sep=".")
   requireNamespace(gmapGenome)
   try(attachNamespace(gmapGenome), silent=TRUE)
-  bam <- bamPaths(mtView(mtReads))
-  readLen <- mtReads@readLength
-  whichRanges <- bamRanges(BamViews(bam, bai, bamRanges = mtRange))
-
-  # FIXME: use a mask= argument to black out hypervariable region?
-  tally.param <- TallyVariantsParam(get(gmapGenome),
-                                    minimum_mapq=20,
-                                    high_base_quality=20L,
-                                    read_length=readLen, 
-                                    ignore_duplicates=TRUE, 
-                                    which=whichRanges,
-                                    indels=TRUE)
-  tallies <- tallyVariants(bam, tally.param) 
-  qa.variants <- qaVariants(tallies)
-  calling.param <- VariantCallingFilters(read.count=read.count,
-                                         p.lower=p.lower,
-                                         p.error=p.error)
-  res <- callVariants(qa.variants, calling.filters=calling.param)
+  genome(mal) <- paste(mtGenome, mtChr, sep=".")
+  isCircular(mal) <- FALSE # for variant calling
+  pars <- TallyVariantsParam(get(gmapGenome), 
+                             minimum_mapq=20L,
+                             high_base_quality=20L,
+                             ignore_duplicates=TRUE, 
+                             read_length=as.integer(median(qwidth(mal))-1), 
+                             which=as(seqinfo(mal)[mtChr], "GRanges"),
+                             indels=TRUE)
+  filters <- VariantCallingFilters(read.count, p.lower)
+  res <- callVariants(qaVariants(tallyVariants(mal@bam, pars)), calling=filters)
   sampleNames(res) <- gsub(paste0(".", mtGenome), "", 
-                           gsub("\\.bam", "", 
-                                basename(bamPaths(attr(mtReads, "mtView")))))
+                           gsub("\\.bam", "", basename(mal@bam)))
   res$PASS <- apply(softFilterMatrix(res), 1, all) == 1
   res <- res[rev(order(res$PASS, totalDepth(res)))]
+  res <- subset(res, totalDepth >= total.count)
   res$VAF <- altDepth(res) / totalDepth(res)
-  return(res)
-}
-
-# hg19, hg38, and GRCh38 mitochondrial genome creation for gmapR
-# (any genome with a FASTA of the MT contig can be processed similarly)
-#
-# See inst/exdata/mitomes/rCRS.fasta and inst/exdata/mitomes/rCRS.R 
-#
-if (FALSE) { 
-
-  library(gmapR)
-  library(rtracklayer)
-  makeGmapGenome <- function(name, destDir="/home/tim/Dropbox/GmapGenomes") {
-    fa <- system.file("extdata", paste0(name, ".fasta"),
-                      package="ATACseeker", mustWork=TRUE) 
-    fastaFile <- rtracklayer::FastaFile(fa)
-    gmapGenome <- GmapGenome(fastaFile, create=TRUE)
-    makeGmapGenomePackage(gmapGenome,
-                          version="1.0.0", 
-                          maintainer="<tim.triche@gmail.com>", 
-                          author="Tim Triche, Jr.", 
-                          destDir=destDir,
-                          license="Artistic-2.0", 
-                          pkgName=paste0("GmapGenome.Hsapiens.", name))
-    return(gmapGenome)
-  }
-
-  # hg19 mitochondrial sequence: 
-  GmapGenome.Hsapiens.hg19.chrM <- makeGmapGenome("hg19.chrM")
-
-  # hg38 mitochondrial sequence: 
-  GmapGenome.Hsapiens.hg38.chrM <- makeGmapGenome("hg38.chrM")
-
-  # GRCh38 mitochondrial sequence:
-  GmapGenome.Hsapiens.GRCh38.MT <- makeGmapGenome("GRCh38.MT")
-
+  genome(res) <- mtGenome
+  return(MRanges(res, coverage(mal)))
 }

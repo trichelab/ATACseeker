@@ -12,9 +12,9 @@ setClass("MAlignments",
 #' @param gal         a GAlignments
 #' @param bam         a bam filename
 #'
-#' @return an MAlignments 
+#' @return            an MAlignments 
 #' 
-#' @import GenomicAlignments
+#' @import            GenomicAlignments
 #' 
 #' @export
 MAlignments <- function(gal, bam) { 
@@ -56,7 +56,7 @@ setMethod("show", signature(object="MAlignments"),
 #' 
 #' @return          a BamViews object
 #'
-#' @import Rsamtools
+#' @import          Rsamtools
 #'
 #' @export
 setMethod("Views", signature(subject="MAlignments"),
@@ -69,21 +69,11 @@ setMethod("Views", signature(subject="MAlignments"),
 
 #' call variants (shockingly enough) 
 #'
-#' @param x           an MAlignments
-#' @param p.lower     lower bound on variant probability to call (0.1)
-#' @param p.error     estimated error probability for a variant (0.001)
-#' @param read.count  minimum number of reads required to support a variant (10)
+#' @param x   an MAlignments
 #' 
-#' @return            a VRanges object
+#' @return    a VRanges object
 #'
-#' @import VariantTools
+#' @import    VariantTools
 #'
 #' @export
-setMethod("callVariants", signature(x="MAlignments"), 
-          function(x, 
-                   p.lower=0.1, 
-                   p.error=0.001, 
-                   read.count=10) {
-            # replace with direct calling ASAP 
-            callMT(x, p.lower, p.error, read.count) 
-          })
+setMethod("callVariants", signature(x="MAlignments"), function(x) callMT(x))

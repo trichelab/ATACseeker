@@ -5,17 +5,10 @@
 \alias{callVariants,MAlignments-method}
 \title{call variants (shockingly enough)}
 \usage{
-\S4method{callVariants}{MAlignments}(x, p.lower = 0.1, p.error = 0.001,
-  read.count = 10)
+\S4method{callVariants}{MAlignments}(x)
 }
 \arguments{
 \item{x}{an MAlignments}
-
-\item{p.lower}{lower bound on variant probability to call (0.1)}
-
-\item{p.error}{estimated error probability for a variant (0.001)}
-
-\item{read.count}{minimum number of reads required to support a variant (10)}
 }
 \value{
 a VRanges object
