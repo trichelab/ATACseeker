@@ -34,17 +34,6 @@ rCRS <- function(mvr, quiet=FALSE) {
     stop("This function currently supports (only) hg19 and hg38/GRCh38.")
   }
 
-  # identify any phantom variants induced solely by liftOver
-  data(rCRSeq)
-  rCRSrefVsAlt <- data.frame(
-    rCRSref=strsplit(as.character(rCRSeq[start(mvr)]),"")[[1]],
-    rCRSalt=alt(mvr)
-  )
-  dropVars <- with(rCRSrefVsAlt, which(rCRSref != rCRSalt))
-  if (length(dropVars) > 0) {
-    message("Dropping artifactual variants...") 
-    mvr <- mvr[setdiff(seq_along(mvr), dropVars)] 
-  } 
   names(mvr) <- mtHGVS(mvr)
   mvr <- annotation(mvr)
   return(mvr)

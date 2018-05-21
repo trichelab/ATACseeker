@@ -44,12 +44,14 @@ setMethod("type", signature(x="MVRanges"),
 #' 
 #' @param x   an MVRanges
 #' 
-#' @return    a CHARACTER vector of variant position strings for MitImpact
+#' @return    a named CHARACTER vector of variant position strings for MitImpact
 #'
 #' @export
 setMethod("pos", signature(x="MVRanges"), 
           function(x) {
-            gsub(paste0(seqlevels(x),":"), "", as.character(granges(x)))
+            loci <- gsub(paste0(seqlevels(x),":"), "", as.character(granges(x)))
+            names(loci) <- mtHGVS(x)
+            return(loci)
           })
 
 
@@ -63,18 +65,19 @@ setMethod("show", signature(object="MVRanges"),
             callNextMethod()
             cat(paste0("  genome: ", unique(genome(object))))
             if ("annotation" %in% names(metadata(object))) {
-              cat(" (see metadata(object)$annotation)")
+              cat(" (try getAnnotations(object))")
             }
-            cat(paste0(", ~", round(coverage(object)), "x coverage"), "\n")
+            cat(paste0(", ~", round(coverage(object)), "x read coverage")) 
+            cat("\n")
           })
 
 
-#' simple annotations of variants (using TxDb.Hsapiens.NCBI.rCRS)
+#' simple annotations of variants (using features from GenBank rCRS GFF record)
 #'
 #' nb. Xiaowu's consequences are Synonymous, Missense, LoF, rRNA, tRNA, D-loop
 #' so we kind of have to have D-loop annotation to tabulate these.  In order to
 #' avoid doing this constantly, we cache the annotation in the MVRange's object
-#' metadata() list. 
+#' metadata() list. This is used in the predictCoding() method for MVRanges.
 #' 
 #' for reference, anno_rCRS was prepared as follows:
 #'
@@ -108,30 +111,46 @@ setMethod("show", signature(object="MVRanges"),
 #' 
 #' @param object  an MVRanges
 #' 
-#' @return        an MVRanges, with annotations from TxDb.Hsapiens.NCBI.rCRS
+#' @return        an MVRanges, with annotations from rCRS
 #'
 #' @export
 setMethod("annotation", signature(object="MVRanges"), 
           function(object) {
 
-            if ("annotation" %in% names(metadata(object))) {
-              anno <- metadata(object)$annotation 
-            } else { 
+            if (!"annotation" %in% names(metadata(object))) {
+              if (unique(genome(object)) != "rCRS") {
+                message("Lifting to rCRS...")
+                object <- rCRS(object)
+              }
               data(anno_rCRS)
-              metadata(object)$annotation <- anno
-            }
-            
-            if (unique(genome(object)) != "rCRS") {
-              message("Lifting to rCRS...")
-              object <- rCRS(object)
+              metadata(object)$annotation <- anno_rCRS
             }
 
+            anno <- getAnnotations(object)
             ol <- findOverlaps(object, anno)
             object$gene <- NA_character_
             object[queryHits(ol)]$gene <- names(anno)[subjectHits(ol)] 
             object$region <- NA_character_
             object[queryHits(ol)]$region <- anno[subjectHits(ol)]$region
             return(object)
+
+          })
+
+
+#' simple helper to retrieve annotations (if present) from an MVRanges
+#'
+#' @param mvr an MVRanges
+#'
+#' @return    a GRanges of annotations, if present, or else NULL
+#'
+#' @export
+setMethod("getAnnotations", signature(annotations="MVRanges"), 
+          function(annotations) {
+            anno <- metadata(annotations)$annotation
+            if (is.null(anno)) {
+              message("Unannotated! Try getAnnotations(annotation(object))).")
+            }
+            return(anno)
           })
 
 
@@ -139,13 +158,119 @@ setMethod("annotation", signature(object="MVRanges"),
 #'
 #' @param mvr an MVRanges
 #'
-#' @return    the subset of that MVRanges within protein-coding regions
+#' @return    subset of MVRanges passing filters within protein-coding regions
 #'
 #' @import    Biostrings
 #'
 #' @export
 setMethod("encoding", signature(x="MVRanges"), 
           function(x) {
-            x <- annotation(x) # just in case...
-            subset(x, PASS & region == "coding") 
+
+            # limit the search 
+            x <- annotation(x) # ensure it's rCRS
+            x <- subset(x, PASS & region == "coding") 
+
+            # fix issues
+            data(rCRSeq)
+            comp <- data.frame(ref=as.character(getSeq(rCRSeq, x)), alt=alt(x))
+            keep <- with(comp, which(ref != alt))
+            
+            # return subset
+            return(x[keep])
+
+          })
+
+
+#' predict coding mutations (annotating the most likely consequences)
+#'
+#' Given an rCRS-situated set of variant calls, predict which may be coding,
+#' and which are synonymous (so as to compute dN/dS and annotate regionally).
+#' 
+#' Like the other predictCoding() methods, one can expect mcols() containing:
+#' 
+#' - varAllele   (reverse complemented if the subject is on the negative strand)
+#' - QUERYID     (usually blank; rCRS liftOver step can make indices confusing)
+#' - TXID        (usually blank; each mitochondrial gene has one transcript)
+#' - CDSID       (usually blank; each mitochondrial gene has one known CDS) 
+#' - GENEID      (usually blank; mitochondrial genes are just ID'ed as 1-13)
+#' - CDSLOC      
+#' - PROTEINLOC
+#' - CONSEQUENCE (synonymous/nonsynonymous/frameshift/nonsense/not translated)
+#' - REFCODON
+#' - VARCODON
+#' - REFAA
+#' - VARAA
+#'
+#' Unlike the other predictCoding methods, many of these will usually be empty. 
+#'
+#' @param mvr an MVRanges
+#'
+#' @return    an rCRS MVRanges with CONSEQUENCE, MTCSQ, and (REF/VAR)(CODON/AA)
+#'
+#' @import    Biostrings
+#'
+#' @export
+setMethod("predictCoding", # mitochondrial annotations kept internally
+          signature(query="MVRanges", "missing", "missing", "missing"), 
+          function(query, ...) {
+
+            # setup:
+            data(rCRSeq)
+            query <- encoding(rCRS(query)) 
+            MT_CODE <- getGeneticCode("SGC1")
+            mtGenes <- subset(metadata(query)$annotation, region == "coding")
+            mcols(mtGenes) <- DataFrame(DNA=getSeq(rCRSeq, mtGenes))
+            mtGenes$AA <- translate(mtGenes$DNA, MT_CODE)
+            ol <- findOverlaps(query, mtGenes)
+
+            # execution:
+            result <- granges(query)
+            result$varAllele <- alt(query)
+
+            stop("predictCoding(MVRanges) is not finished") 
+
+          })
+
+
+#' summarize consensus pathogenicity estimates from MitImpact (2.0 or newer)
+#'
+#' Note: this method requires an internet connection. For now, at least.
+#'
+#' @param mvr an MVRanges, almost always after predictCoding(MVRanges)
+#'
+#' @return    MitImpact output for variants where information is available 
+#'
+#' @import    jsonlite
+#'
+#' @export
+setMethod("summarizeVariants", signature(query="MVRanges","missing","missing"),
+          function(query, ...) {
+           
+            getImpact <- function(pos) {
+              url <- paste("http://mitimpact.css-mendel.it", "api", "v2.0",
+                           "genomic_position", pos, sep="/")
+              res <- as.data.frame(read_json(url, simplifyVector=TRUE)$variants)
+              if (nrow(res) > 0) {
+                res$genomic <- with(res, paste0("g.", Start, Ref, ">", Alt))
+                res$protein <- with(res, paste0("p.",AA_ref,AA_position,AA_alt))
+                res$change <- with(res, paste(Gene_symbol, protein))
+                res[, c("genomic","protein","APOGEE_boost_consensus","MtoolBox",
+                        "Mitomap_Phenotype","Mitomap_Status","OXPHOS_complex",
+                        "dbSNP_150_id","Codon_substitution")]
+              } else {
+                return(NULL)
+              }
+            }
+
+            hits <- lapply(pos(encoding(query)), getImpact)
+            hits <- hits[which(sapply(hits, length) > 0)] 
+
+            # be precise, if possible
+            for (h in names(hits)) {
+              j <- hits[[h]]
+              if (h %in% j$genomic) hits[[h]] <- j[which(j$genomic == h),]
+            }
+
+            do.call(rbind, hits)
+
           })

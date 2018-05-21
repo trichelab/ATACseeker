@@ -3,7 +3,7 @@
 \docType{methods}
 \name{annotation,MVRanges-method}
 \alias{annotation,MVRanges-method}
-\title{simple annotations of variants (using TxDb.Hsapiens.NCBI.rCRS)}
+\title{simple annotations of variants (using features from GenBank rCRS GFF record)}
 \usage{
 \S4method{annotation}{MVRanges}(object)
 }
@@ -11,13 +11,13 @@
 \item{object}{an MVRanges}
 }
 \value{
-an MVRanges, with annotations from TxDb.Hsapiens.NCBI.rCRS
+an MVRanges, with annotations from rCRS
 }
 \description{
 nb. Xiaowu's consequences are Synonymous, Missense, LoF, rRNA, tRNA, D-loop
 so we kind of have to have D-loop annotation to tabulate these.  In order to
 avoid doing this constantly, we cache the annotation in the MVRange's object
-metadata() list.
+metadata() list. This is used in the predictCoding() method for MVRanges.
 }
 \details{
 for reference, anno_rCRS was prepared as follows:

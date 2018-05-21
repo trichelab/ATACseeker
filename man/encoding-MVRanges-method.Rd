@@ -11,7 +11,7 @@
 \item{mvr}{an MVRanges}
 }
 \value{
-the subset of that MVRanges within protein-coding regions
+subset of MVRanges passing filters within protein-coding regions
 }
 \description{
 simple helper to retrieve PASS'ing, protein-coding variants from MVRanges
