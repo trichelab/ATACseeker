@@ -17,8 +17,8 @@ setClass("MAlignmentsList", contains="GAlignmentsList")
 #' @export
 MAlignmentsList <- function(...) {
   mall <- new("MAlignments", GAlignmentsList(...))
-  message("Calculating and caching read coverage...") 
-  metadata(mall)$coverage <- sapply(mall, coverage)
+  getCovg <- function(x) attr(x, "coverage")
+  metadata(mall)$coverage <- sapply(mall, getCovg)
   return(mall)
 }
 
@@ -31,9 +31,7 @@ MAlignmentsList <- function(...) {
 #'
 #' @export
 setMethod("coverage", signature(x="MAlignmentsList"),
-          function(x) {
-            metadata(x)$coverage[colnames(x)]
-          })
+          function(x) metadata(x)$coverage[colnames(x)])
 
 
 #' display alignment collections with read coverage estimates

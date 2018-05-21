@@ -67,6 +67,8 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19",plotMAPQ=FALSE,filter=TRUE){
   }
 
   # MAlignments == wrapped GAlignments
-  return(MAlignments(gal=mtReads, bam=bam))
+  mal <- MAlignments(gal=mtReads, bam=bam)
+  attr(mal, "coverage") <- coverage(mal)
+  return(mal)
 
 }
