@@ -38,7 +38,7 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19",plotMAPQ=FALSE,filter=TRUE){
   idxStats <- idxstatsBam(bamfile)
   rownames(idxStats) <- idxStats$seqnames
   mtFrac <- idxStats[chrM, "mapped"] / sum(idxStats[, "mapped"])
-  message(bam, " has ~", round(mtFrac * 100, 2), "% mitochondrial reads.")
+  message(bam, " has ~", round(mtFrac * 100), "% mitochondrial reads.")
 
   mtRange <- GRanges(chrM, IRanges(1, idxStats[chrM, "seqlength"]), "*")
   mtView <- BamViews(bam, bai, bamRanges=mtRange)
