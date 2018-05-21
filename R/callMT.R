@@ -1,7 +1,5 @@
 #' call mitochondrial variants from an MAlignments object 
 #'
-#' FIXME: use a mask= argument to black out the hypervariable regions?
-#'
 #' FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,
 #'        regardless of what reference they were originally aligned against.
 #' 
@@ -44,8 +42,7 @@ callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
   mvr <- MVRanges(res, coverage(mal))
   if (rCRS == TRUE & (!mtGenome %in% c("GRCh38","hg38"))) {
     mvr <- rCRS(mvr)
-  } else { 
-    names(mvr) <- paste0(as.character(mvr), ":", ref(mvr), ">", alt(mvr))
   }
+  names(mvr) <- mtHGVS(mvr)
   return(mvr)
 }

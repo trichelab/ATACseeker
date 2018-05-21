@@ -19,9 +19,6 @@ callMT(mal, p.lower = 0.1, read.count = 2L, total.count = 10L,
 \item{rCRS}{lift to rCRS if not already hg38/GRCh38? (FALSE)}
 }
 \description{
-FIXME: use a mask= argument to black out the hypervariable regions?
-}
-\details{
 FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,
        regardless of what reference they were originally aligned against.
 }

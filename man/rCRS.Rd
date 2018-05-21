@@ -4,14 +4,18 @@
 \alias{rCRS}
 \title{liftOver and simplify an hg19 mitochondrial genome (variants) to rCRS}
 \usage{
-rCRS(mvr)
+rCRS(mvr, quiet = FALSE)
 }
 \arguments{
 \item{mvr}{an MVRanges of variant calls}
+
+\item{quiet}{suppress warnings and messages? (FALSE)}
 }
 \value{
-an MVRanges of variant calls against rCRS
+an MVRanges of variant calls, repositioned against rCRS
 }
 \description{
-liftOver and simplify an hg19 mitochondrial genome (variants) to rCRS
+Note: this presupposes that the rCRS sequence (GenBank accession NC_012920.1)
+is available and gene features provided by GenBank as a GFF3 are available,
+or can be located. Otherwise this is all rather a waste of time...
 }
