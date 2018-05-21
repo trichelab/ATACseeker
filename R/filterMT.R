@@ -18,6 +18,7 @@ filterMT <- function(SE, minCovg=20) {
     stop("filterMT requires a RangedSummarizedExperiment with colData $mtCovg.")
   }
 
+  message("Filtering out samples with < ", minCovg, " mean read coverage...")
   return(SE[, which(SE$mtCovg >= minCovg)])
 
 }
