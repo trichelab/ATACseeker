@@ -15,6 +15,8 @@
 #' @export
 rCRS <- function(mvr, quiet=FALSE) { 
 
+  if (mtGenome == "rCRS") return(mvr)
+
   data(chrominfo.rCRS)
   mtGenome <- unique(genome(mvr))
   seqlevelsStyle(mvr) <- "UCSC" # chrM
