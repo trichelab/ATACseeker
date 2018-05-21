@@ -65,9 +65,9 @@ setMethod("show", signature(object="MVRanges"),
             if ("annotation" %in% names(metadata(object))) {
               cat(" (see metadata(object)$annotation)")
             }
-            cat("\n")
-            cat(paste0("  coverage: ~", round(coverage(object)), "x"), "\n")
+            cat(paste0(", ~", round(coverage(object)), "x coverage"), "\n")
           })
+
 
 #' simple annotations of variants (using TxDb.Hsapiens.NCBI.rCRS)
 #'
@@ -132,4 +132,20 @@ setMethod("annotation", signature(object="MVRanges"),
             object$region <- NA_character_
             object[queryHits(ol)]$region <- anno[subjectHits(ol)]$region
             return(object)
+          })
+
+
+#' simple helper to retrieve PASS'ing, protein-coding variants from MVRanges
+#'
+#' @param mvr an MVRanges
+#'
+#' @return    the subset of that MVRanges within protein-coding regions
+#'
+#' @import    Biostrings
+#'
+#' @export
+setMethod("encoding", signature(x="MVRanges"), 
+          function(x) {
+            x <- annotation(x) # just in case...
+            subset(x, PASS & region == "coding") 
           })
