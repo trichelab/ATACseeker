@@ -15,10 +15,10 @@
 #' @export
 rCRS <- function(mvr, quiet=FALSE) { 
 
+  mtGenome <- unique(genome(mvr))
   if (mtGenome == "rCRS") return(mvr)
 
   data(chrominfo.rCRS)
-  mtGenome <- unique(genome(mvr))
   seqlevelsStyle(mvr) <- "UCSC" # chrM
   if (mtGenome %in% c("GRCh38","hg38")) {
     seqinfo(mvr) <- chrominfo.rCRS # identical to GRCh38/hg38 modulo name
