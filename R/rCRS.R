@@ -30,5 +30,6 @@ rCRS <- function(mvr, quiet=FALSE) {
     stop("This function currently supports (only) hg19 and hg38/GRCh38.")
   }
   names(mvr) <- mtHGVS(mvr)
+  mvr <- annotation(mvr)
   return(mvr)
 }

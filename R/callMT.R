@@ -16,6 +16,7 @@
 #'
 #' @export
 callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
+
   if (!is(mal, "MAlignments")) stop("callMT needs an MAlignments to work.")
   mtChr <- seqlevelsInUse(mal)
   mtGenome <- unique(genome(mal))
@@ -41,7 +42,7 @@ callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
   genome(res) <- mtGenome
   mvr <- MVRanges(res, coverage(mal))
   if (rCRS == TRUE & (!mtGenome %in% c("GRCh38","hg38"))) {
-    mvr <- rCRS(mvr)
+    mvr <- annotation(rCRS(mvr))
   }
   names(mvr) <- mtHGVS(mvr)
   return(mvr)

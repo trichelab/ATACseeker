@@ -62,7 +62,7 @@ setMethod("show", signature(object="MVRanges"),
           function(object) {
             callNextMethod()
             cat(paste0("  genome: ", unique(genome(object))))
-            if ("anno" %in% names(metadata(object))) {
+            if ("annotation" %in% names(metadata(object))) {
               cat(" (see metadata(object)$annotation)")
             }
             cat("\n")
