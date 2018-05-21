@@ -1,19 +1,36 @@
 #' grab the mitochondrial reads from a BAM and estimate their fraction
 #'
 #' nb. this could probably be done faster for a list of BAMs but it's not
-#' nb. nb. returns NuMt-depleted mitochondrial GenomicAlignments
+#' nb. nb. this returns NuMt-depleted mitochondrial GenomicAlignments
 #' FIXME: liftOver hg18/hg19-aligned results to rCRS for better variant calls
 #' 
-#' @param bam       a BAM filename, which should have an index (else index it)
+#' @param bam       a BAM filename, or a RangedSummarizedExperiment with $BAM
 #' @param chrM      what the mitochondrial contig is called. Default is "chrM" 
 #' @param mtGenome  what mitochondrial assembly was used (default is hg19) 
 #' @param plotMAPQ  plot distribution of mitochondrial mapping quality? (FALSE)
+#' @param filter    filter on colData(bam)$mtCovg? (default is TRUE, if an RSE)
 #'
 #' @import GenomicAlignments
 #' @import Rsamtools
 #'
 #' @export
-getMT <- function(bam, chrM="chrM", mtGenome="hg19", plotMAPQ=FALSE) {
+getMT <- function(bam, chrM="chrM", mtGenome="hg19",plotMAPQ=FALSE,filter=TRUE){
+
+  if (is(bam, "RangedSummarizedExperiment")) {
+    if (! "BAM" %in% names(colData(bam))) stop("RSE must have colData()$BAM")
+    if (filter == TRUE) { 
+      if (!"mtCovg" %in% names(colData(bam))) stop("filter on colData()$mtCovg")
+      bam <- filterMT(bam) 
+    }
+    if (nrow(bam) > 0) {
+      bams <- bam$BAM
+      names(bams) <- colnames(bam)
+      return(GAlignmentsList(lapply(bams, getMT)))
+    } else { 
+      message("No matching records.")
+      return(NULL) 
+    }
+  }
 
   bai <- paste0(bam, ".bai")
   if (!file.exists(bai)) indexBam(bam)

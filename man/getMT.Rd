@@ -4,19 +4,22 @@
 \alias{getMT}
 \title{grab the mitochondrial reads from a BAM and estimate their fraction}
 \usage{
-getMT(bam, chrM = "chrM", mtGenome = "hg19", plotMAPQ = FALSE)
+getMT(bam, chrM = "chrM", mtGenome = "hg19", plotMAPQ = FALSE,
+  filter = TRUE)
 }
 \arguments{
-\item{bam}{a BAM filename, which should have an index (else index it)}
+\item{bam}{a BAM filename, or a RangedSummarizedExperiment with $BAM}
 
 \item{chrM}{what the mitochondrial contig is called. Default is "chrM"}
 
 \item{mtGenome}{what mitochondrial assembly was used (default is hg19)}
 
 \item{plotMAPQ}{plot distribution of mitochondrial mapping quality? (FALSE)}
+
+\item{filter}{filter on colData(bam)$mtCovg? (default is TRUE, if an RSE)}
 }
 \description{
 nb. this could probably be done faster for a list of BAMs but it's not
-nb. nb. returns NuMt-depleted mitochondrial GenomicAlignments
+nb. nb. this returns NuMt-depleted mitochondrial GenomicAlignments
 FIXME: liftOver hg18/hg19-aligned results to rCRS for better variant calls
 }
