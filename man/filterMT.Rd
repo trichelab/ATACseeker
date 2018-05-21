@@ -2,12 +2,12 @@
 % Please edit documentation in R/filterMT.R
 \name{filterMT}
 \alias{filterMT}
-\title{Filter a RangedSummarizedExperiment's columns based on its $mtCovg mcols}
+\title{Filter a RangedSummarizedExperiment's columns based on its $mtCovg colData}
 \usage{
 filterMT(SE, minCovg = 20)
 }
 \arguments{
-\item{SE}{a RangedSummarizedExperiment with an mcols() named mtCovg}
+\item{SE}{a RangedSummarizedExperiment with colData() named mtCovg}
 
 \item{minCovg}{minimum covg (20, cf. Griffin, Genetics in Medicine 2014)}
 }
