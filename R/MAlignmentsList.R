@@ -16,9 +16,8 @@ setClass("MAlignmentsList", contains="GAlignmentsList")
 #' 
 #' @export
 MAlignmentsList <- function(...) {
-  mall <- new("MAlignments", GAlignmentsList(...))
-  getCovg <- function(x) attr(x, "coverage")
-  metadata(mall)$coverage <- sapply(mall, getCovg)
+  mall <- new("MAlignments", GAlignmentsList(list(...)))
+  metadata(mall)$coverage <- lapply(mall, function(x) attr(x, "coverage"))
   return(mall)
 }
 
