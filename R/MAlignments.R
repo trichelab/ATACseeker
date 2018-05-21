@@ -1,11 +1,12 @@
 #' wraps a GAlignments with information about coverage and its target BAM file
 #' 
-#' @import GenomicRanges
+#' @import GenomicAlignments
 #' 
 #' @exportClass MAlignments
 setClass("MAlignments",
          representation(bam="character"), 
          contains="GAlignments")
+
 
 #' wrap a GAlignments for easier stats
 #'
@@ -23,6 +24,7 @@ MAlignments <- function(gal, bam) {
   new("MAlignments", gal, bam=bam)
 }
 
+
 #' estimated read coverage
 #' 
 #' @param x   an MAlignments
@@ -37,6 +39,7 @@ setMethod("coverage", signature(x="MAlignments"),
             return((length(x) * readLength) / genomeSize)
           })
 
+
 #' display alignment records with read coverage estimate
 #'
 #' @param x   an MAlignments
@@ -49,6 +52,7 @@ setMethod("show", signature(object="MAlignments"),
             cat(paste0("  ", round(coverage(object)), 
                        "x approximate read coverage."), "\n")
           })
+
 
 #' recreate the BamViews needed to call variants 
 #'
@@ -66,6 +70,7 @@ setMethod("Views", signature(subject="MAlignments"),
             bamRanges <- as(seqinfo(subject)[seqlevelsInUse(subject)],"GRanges")
             BamViews(bam=bam, bai=bai, bamRanges=bamRanges)
           })
+
 
 #' call variants (shockingly enough) 
 #'

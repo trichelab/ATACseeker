@@ -25,7 +25,7 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19",plotMAPQ=FALSE,filter=TRUE){
     if (nrow(bam) > 0) {
       bams <- bam$BAM
       names(bams) <- colnames(bam)
-      return(GAlignmentsList(lapply(bams, getMT)))
+      return(MAlignmentsList(lapply(bams, getMT)))
     } else { 
       message("No matching records.")
       return(NULL) 
