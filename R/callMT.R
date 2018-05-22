@@ -40,7 +40,7 @@ callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
                              indels=TRUE)
   
   message("Tallying variants...") 
-  tallied <- tallyVariants(asBam(mal), pars)
+  tallied <- tallyVariants(fileName(mal), pars)
 
   message("QA'ing variants...") 
   QAed <- qaVariants(tallied)
@@ -50,7 +50,7 @@ callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
   res <- callVariants(QAed, calling.filters=filters)
 
   sampleNames(res) <- gsub(paste0(".", mtGenome), "", 
-                           gsub("\\.bam", "", basename(asBam(mal))))
+                           gsub("\\.bam", "", basename(fileName(mal))))
   res$PASS <- apply(softFilterMatrix(res), 1, all) == 1
   res <- subset(res, totalDepth(res) >= total.count)
   res$VAF <- altDepth(res) / totalDepth(res)

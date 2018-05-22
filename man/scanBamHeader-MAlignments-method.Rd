@@ -11,7 +11,7 @@
 \item{bamRanges}{an MAlignments}
 }
 \value{
-a BamViews object
+a BAM header
 }
 \description{
 fetch the header from an MAlignments' original BAM

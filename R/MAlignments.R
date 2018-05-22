@@ -107,9 +107,9 @@ setMethod("show", signature(object="MAlignments"),
 #' @import          Rsamtools
 #'
 #' @export
-setMethod("asBam", signature(file="MAlignments"),
-          function(file) {
-            return(file@bam)
+setMethod("fileName", signature(object="MAlignments"),
+          function(object) {
+            return(object@bam)
           })
 
 
@@ -117,32 +117,14 @@ setMethod("asBam", signature(file="MAlignments"),
 #'
 #' @param bamRanges an MAlignments
 #' 
-#' @return          a BamViews object
+#' @return          a BAM header
 #'
 #' @import          Rsamtools
 #'
 #' @export
 setMethod("scanBamHeader", signature(files="MAlignments"),
           function(files) {
-            return(scanBamHeader(asBam(files)))
-          })
-
-
-#' recreate the BamViews used to load an MAlignments
-#'
-#' @param bamRanges an MAlignments
-#' 
-#' @return          a BamViews object
-#'
-#' @import          Rsamtools
-#'
-#' @export
-setMethod("BamViews", signature(bamRanges="MAlignments"),
-          function(bamRanges) {
-            bam <- bamRanges@bam
-            bai <- paste0(bam, ".bai")
-            gr <- as(seqinfo(bamRanges)[seqlevelsInUse(bamRanges)], "GRanges")
-            BamViews(bam=bam, bai=bai, bamRanges=gr)
+            return(scanBamHeader(fileName(files)))
           })
 
 

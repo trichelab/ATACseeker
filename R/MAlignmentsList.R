@@ -36,9 +36,9 @@ setMethod("updateObject", signature(object="MAlignmentsList"),
               metadata(object)$Summary <- Summary(object)
               message("Done.")
             }
-            if (!"asBam" %in% names(metadata(object))) {
-              message("Caching BAM file listings in metadata(object)$asBam:")
-              metadata(object)$asBam <- asBam(object)
+            if (!"" %in% names(metadata(object))) {
+              message("Caching BAM file listings in metadata(object)$BAMs:")
+              metadata(object)$BAMs <- fileName(object)
               message("Done.")
             }
             return(object)
@@ -75,28 +75,28 @@ setMethod("runLength", signature(x="MAlignmentsList"),
           function(x) sapply(x, runLength))
 
 
-#' list the BAM files and their aligned genomes for MAlignmentsList elements
+#' list the BAM filenames for the elements of an MAlignmentsList
 #' 
-#' (co-opting a generic from `Rsamtools`)
-#'
-#' @param file  an MAlignmentsList
+#' @param object  an MAlignmentsList
 #' 
-#' @return      BAM file summary for the MAlignmentsList 
-#'
-#' @import      S4Vectors
+#' @return        BAM file summary for the MAlignmentsList 
 #' 
 #' @export
-setMethod("asBam", signature(file="MAlignmentsList"),
-          function(file) {
-            if ("asBam" %in% names(metadata(file))) {
-              BAMs <- metadata(file)$asBam
+setMethod("fileName", signature(object="MAlignmentsList"),
+          function(object) {
+            if ("BAMs" %in% names(metadata(object))) {
+              BAMs <- metadata(object)$BAMs
             } else {
-              BAMs <- DataFrame(BAM=sapply(file, asBam),
-                                genome=unname(sapply(file, genome)))
-              if (!is.null(names(file))) rownames(BAMs) <- names(file)
+              BAMs <- DataFrame(BAM=sapply(object, fileName),
+                                readLength=unname(sapply(object, runLength)),
+                                genome=unname(sapply(object, genome)))
+              if (!is.null(names(object))) rownames(BAMs) <- names(object)
             } 
-            if (!is.null(names(file))) BAMs <- BAMs[names(file), ] 
-            return(BAMs)
+            if (!is.null(names(object))) {
+              return(BAMs[names(object), ])
+            } else { 
+              return(BAMs)
+            }
           })
 
 
