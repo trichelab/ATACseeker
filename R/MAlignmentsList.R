@@ -19,24 +19,8 @@ MAlignmentsList <- function(...) {
   gal <- GenomicAlignments:::GAlignmentsList(...)
   if (is.null(names(gal))) warning("MAlignmentsList with no element names!")
   mall <- new("MAlignmentsList", gal)
-  metadata(mall)$Summary <- Summary(mall)
   return(mall)
 }
-
-
-#' number of aligned fragments per element
-#'
-#' (co-opting a generic from chromVAR to get reads per element)
-#' 
-#' @param object  an MAlignmentsList
-#' 
-#' @return        the fragments (length) for each element
-#'
-#' @import        chromVAR
-#'
-#' @export
-setMethod("getFragmentsPerSample", signature(object="MAlignmentsList"),
-          function(object) sapply(object, length))
 
 
 #' estimated read coverage for each element (cached on load)
@@ -51,7 +35,7 @@ setMethod("getFragmentsPerSample", signature(object="MAlignmentsList"),
 #' 
 #' @export
 setMethod("coverage", signature(x="MAlignmentsList"),
-          function(x) Summary(x)[, "coverage"])
+          function(x) Summary(x)[, "genomeCoverage"])
 
 
 #' estimated read length for each element (cached on load)
@@ -80,21 +64,12 @@ setMethod("runLength", signature(x="MAlignmentsList"),
 #' @export
 setMethod("Summary", signature(x="MAlignmentsList"),
           function(x) {
-
-            # use cached version, if available
-            if ("Summary" %in% names(metadata(x))) { 
-              dat <- metadata(x)$Summary
-              if (!is.null(names(x))) dat <- dat[names(x),]
-            } else { 
-              dat <- DataFrame(
-                reads=sapply(x, length),
-                readLength=sapply(x, runLength),
-                genomeSize=sapply(x, yieldSize)
-              ) 
-              dat$coverage <- with(dat, (reads * readLength) / genomeSize)
-              if (!is.null(names(x))) rownames(dat) <- names(x)
-            }
-            
+             
+            dat <- DataFrame(reads=sapply(x, length),
+                             readLength=sapply(x, runLength),
+                             genomeSize=sapply(x, yieldSize))
+            dat$genomeCoverage <- round(with(dat,(reads*readLength)/genomeSize))
+            if (!is.null(names(x))) rownames(dat) <- names(x)
             return(dat)
 
           })
@@ -109,7 +84,7 @@ setMethod("show", signature(object="MAlignmentsList"),
           function(object) {
             cat("MAlignmentsList object of length", length(object), "\n")
             cat("-------\n", sep = "")
-            cat("Summary(object):\n")
+            cat("Summary(object)): presented as a ")
             show(Summary(object))
             cat("-------\n", sep = "")
             cat("seqinfo: ", summary(seqinfo(object)), "\n", sep = "")
