@@ -35,7 +35,7 @@ MAlignments <- function(gal, bam) {
 #' @export
 setMethod("coverage", signature(x="MAlignments"),
           function(x) {
-            unname( (length(x) / runLength(x)) / yieldSize(x) )
+            unname( (length(x) * runLength(x)) / yieldSize(x) )
           })
 
 
