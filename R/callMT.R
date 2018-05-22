@@ -3,11 +3,12 @@
 #' FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,
 #'        regardless of what reference they were originally aligned against.
 #' 
-#' @param mal         an MAlignments 
+#' @param mal         an MAlignments (or, potentially, an MAlignmentsList) 
 #' @param p.lower     lower bound on binomial probability for a variant (0.1)
 #' @param read.count  minimum alt read depth required to support a variant (2)
 #' @param total.count minimum total read depth required to keep a variant (10)
 #' @param rCRS        lift to rCRS if not already hg38/GRCh38? (FALSE) 
+#' @param parallel    try to run in parallel? (FALSE) 
 #'
 #' @import gmapR
 #' @import VariantTools
@@ -15,9 +16,23 @@
 #' @import GmapGenome.Hsapiens.hg19.chrM
 #'
 #' @export
-callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
+callMT <- function(mal, p.lower=.1, read.count=2L, 
+                   total.count=10L, rCRS=FALSE, parallel=FALSE){
 
-  if (!is(mal, "MAlignments")) stop("callMT needs an MAlignments to work.")
+  # infuriating bug, need to revisit this
+  if (parallel == TRUE) { 
+    register(MulticoreParam(detectCores()))
+  } else { 
+    register(SerialParam())
+  } 
+
+  if (!is(mal, "MAlignments") & !is(mal, "MAlignmentsList")) {
+    stop("callMT needs an MAlignments or MAlignmentsList to call variants.")
+  } else if (is(mal, "MAlignmentsList")) { 
+    message("Variant-calling an MAlignmentsList. This may melt your machine.")
+    return(VRangesList(lapply(mal, callMT, parallel=parallel)))
+  }
+
   mtChr <- seqlevelsInUse(mal)
   mtGenome <- unique(genome(mal))
   gmapGenome <- paste("GmapGenome", "Hsapiens", mtGenome, mtChr, sep=".")
@@ -37,13 +52,11 @@ callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
   sampleNames(res) <- gsub(paste0(".", mtGenome), "", 
                            gsub("\\.bam", "", basename(mal@bam)))
   res$PASS <- apply(softFilterMatrix(res), 1, all) == 1
-  res <- subset(res, totalDepth >= total.count)
+  res <- subset(res, totalDepth(res) >= total.count)
   res$VAF <- altDepth(res) / totalDepth(res)
   genome(res) <- mtGenome
   mvr <- MVRanges(res, coverage(mal))
-  if (rCRS == TRUE & (!mtGenome %in% c("GRCh38","hg38"))) {
-    mvr <- annotation(rCRS(mvr))
-  }
+  if (rCRS == TRUE) mvr <- rCRS(mvr)
   names(mvr) <- mtHGVS(mvr)
   return(mvr)
 }
