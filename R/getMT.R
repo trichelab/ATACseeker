@@ -9,12 +9,14 @@
 #' @param mtGenome  what mitochondrial assembly was used (default is hg19) 
 #' @param plotMAPQ  plot distribution of mitochondrial mapping quality? (FALSE)
 #' @param filter    filter on colData(bam)$mtCovg? (default is TRUE, if an RSE)
+#' @param parallel  load multiple BAMs in parallel, if possible? (FALSE)
 #'
 #' @import GenomicAlignments
 #' @import Rsamtools
 #'
 #' @export
-getMT <- function(bam, chrM="chrM", mtGenome="hg19",plotMAPQ=FALSE,filter=TRUE){
+getMT <- function(bam, chrM="chrM", mtGenome="hg19", 
+                  plotMAPQ=FALSE, filter=TRUE, parallel=FALSE){
 
   if (is(bam, "RangedSummarizedExperiment")) {
     if (! "BAM" %in% names(colData(bam))) stop("RSE must have colData()$BAM")
@@ -25,8 +27,15 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19",plotMAPQ=FALSE,filter=TRUE){
     if (nrow(bam) > 0) {
       bams <- bam$BAM
       names(bams) <- colnames(bam)
-      # why lapply()? because most laptops will die before 3000 runs otherwise
-      return(MAlignmentsList(lapply(bams, getMT)))
+      # why lapply() by default? 
+      # because most laptops will die otherwise!
+      if (parallel == TRUE) {
+        return(MAlignmentsList(lapply(bams, getMT)))
+      } else {
+        message("Loading multiple BAMs in parallel may kill your machine.")
+        message("Set options('mc.cores') beforehand, and beware of swapping.")
+        return(MAlignmentsList(mclapply(bams, getMT)))
+      }
     } else { 
       message("No matching records.")
       return(NULL) 

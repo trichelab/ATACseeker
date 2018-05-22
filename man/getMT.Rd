@@ -5,7 +5,7 @@
 \title{grab the mitochondrial reads from a BAM and estimate their fraction}
 \usage{
 getMT(bam, chrM = "chrM", mtGenome = "hg19", plotMAPQ = FALSE,
-  filter = TRUE)
+  filter = TRUE, parallel = FALSE)
 }
 \arguments{
 \item{bam}{a BAM filename, or a RangedSummarizedExperiment with $BAM}
@@ -17,6 +17,8 @@ getMT(bam, chrM = "chrM", mtGenome = "hg19", plotMAPQ = FALSE,
 \item{plotMAPQ}{plot distribution of mitochondrial mapping quality? (FALSE)}
 
 \item{filter}{filter on colData(bam)$mtCovg? (default is TRUE, if an RSE)}
+
+\item{parallel}{load multiple BAMs in parallel, if possible? (FALSE)}
 }
 \description{
 nb. this could probably be done faster for a list of BAMs but it's not

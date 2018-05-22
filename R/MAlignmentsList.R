@@ -22,6 +22,8 @@ MAlignmentsList <- function(...) {
     message("Warning: creating an MAlignmentsList without element names.")
   }
   mall <- new("MAlignmentsList", gal)
+  # cache this for quick summaries later on:
+  metadata(mall)$properties <- getProperties(mall)
   return(mall)
 }
 
@@ -77,14 +79,29 @@ setGeneric("getProperties", function(ClassDef) return(ClassDef))
 #' @export
 setMethod("getProperties", signature(ClassDef="MAlignmentsList"),
           function(ClassDef) {
-            contig <- unique(seqlevels(ClassDef))
-            basepairs <- seqlengths(ClassDef)[contig]
-            dat <- DataFrame(reads=getFragmentsPerSample(ClassDef),
-                             contig=rep(contig, length(ClassDef)),
-                             basepairs=rep(basepairs, length(ClassDef)),
-                             coverage=paste0(round(coverage(ClassDef)), "x"))
-            if (!is.null(names(ClassDef))) rownames(dat) <- names(ClassDef)
-            return(dat)
+
+            # use cached version, if at all possible
+            if ("properties" %in% names(metadata(ClassDef)) &
+                is(metadata(ClassDef)$properties, "DataFrame")) {
+              # update if necessary 
+              if (!is.null(names(ClassDef)) & 
+                  !identical(rownames(metadata(ClassDef)$properties))) {
+                metadata(ClassDef)$properties <- 
+                  metadata(ClassDef)$properties[names(ClassDef),]
+              }
+            } else { 
+              # otherwise generate a cached version
+              contig <- unique(seqlevels(ClassDef))
+              basepairs <- seqlengths(ClassDef)[contig]
+              dat <- DataFrame(reads=getFragmentsPerSample(ClassDef),
+                               contig=rep(contig, length(ClassDef)),
+                               basepairs=rep(basepairs, length(ClassDef)),
+                               coverage=paste0(round(coverage(ClassDef)), "x"))
+              if (!is.null(names(ClassDef))) rownames(dat) <- names(ClassDef)
+              metadata(ClassDef)$properties <- dat
+            }
+            return(metadata(ClassDef)$properties)
+
           })
 
 
@@ -97,7 +114,7 @@ setMethod("show", signature(object="MAlignmentsList"),
           function(object) {
             cat("MAlignmentsList object of length", length(object), "\n")
             cat("-------\n", sep = "")
-            cat("Element summary by getProperties():\n")
+            cat("Element summary from getProperties(object):\n")
             show(getProperties(object))
             cat("-------\n", sep = "")
             cat("seqinfo: ", summary(seqinfo(object)), "\n", sep = "")
