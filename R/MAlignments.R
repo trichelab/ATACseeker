@@ -4,9 +4,9 @@
 #' 
 #' @exportClass MAlignments
 setClass("MAlignments",
-         representation(bam="character"), 
+         representation(bam="character",
+                        runLength="numeric"), 
          contains="GAlignments")
-
 
 #' wrap a GAlignments for easier stats
 #'
@@ -20,17 +20,12 @@ setClass("MAlignments",
 #' @export
 MAlignments <- function(gal, bam) { 
   if (!is(gal, "GAlignments")) stop("gal must be a GAlignments. Exiting.")
-  if (length(bam) > 1) stop("bam must be a string. Exiting.")
-  x <- new("MAlignments", gal, bam=bam)
-  metadata(x)$runLength <- runLength(x)
-  genomeSize <- seqlengths(x)[seqlevelsInUse(x)]
-  metadata(x)$coverage <- with(metadata(x), (length(x)*runLength) / genomeSize)
-  metadata(x)$Summary <- Summary(x)
-  return(x)
+  if (length(bam) > 1) stop("bam must be a string naming a BAM file. Exiting.")
+  new("MAlignments", gal, bam=bam, runLength=(median(qwidth(gal))-1))
 }
 
 
-#' estimated read coverage (cached when possible)
+#' estimated read coverage
 #' 
 #' @param x   an MAlignments
 #' 
@@ -39,53 +34,52 @@ MAlignments <- function(gal, bam) {
 #' @export
 setMethod("coverage", signature(x="MAlignments"),
           function(x) {
-            if ("coverage" %in% names(metadata(x))) {
-              return(metadata(x)$coverage)
-            } else { 
-              genomeSize <- seqlengths(x)[seqlevelsInUse(x)]
-              return( (length(x)*runLength(x)) / genomeSize )
-            }
+            unname( (length(x) / runLength(x)) / yieldSize(x) )
           })
 
 
-#' median read length (cached when possible)
+#' median read length
 #' 
 #' @param x   an MAlignments
 #' 
-#' @return    estimated coverage (numeric)
+#' @return    read length
 #'
 #' @export
 setMethod("runLength", signature(x="MAlignments"),
-          function(x) { 
-            if ("readLength" %in% names(metadata(x))) {
-              return(metadata(x)$readLength)
-            } else { 
-              return(median(qwidth(x)) - 1)
-            }
+          function(x) {
+            return(x@runLength)
           })
 
 
-#' Summary: reads, readLength, genomeSize, coverage
+#' genome size
+#' 
+#' @param x   an MAlignments
+#' 
+#' @return    genome size 
+#'
+#' @export
+setMethod("yieldSize", signature(object="MAlignments"),
+          function(object) {
+            unname(seqlengths(object)[seqlevelsInUse(object)])
+          })
+
+
+#' summary of object: reads, readLength, genomeSize, coverage
 #' 
 #' specifically, 
 #' c(length(x), runLength(x), seqlengths(x)[seqlevelsInUse(x)], coverage(x))
 #' 
 #' @param x   an MAlignments
 #' 
-#' @return    estimated coverage (numeric)
+#' @return    summary of x
 #'
 #' @export
 setMethod("Summary", signature(x="MAlignments"),
           function(x) {
-            if ("Summary" %in% names(metadata(x))) {
-              res <- metadata(x)$Summary
-            } else { 
-              res <- c(reads=length(x),
-                       readLength=runLength(x),
-                       genomeSize=seqlengths(x)[seqlevelsInUse(x)],
-                       coverage=coverage(x))
-            }
-            return(res)
+            c(reads=length(x),
+              readLength=runLength(x),
+              genomeSize=yieldSize(x),
+              coverage=coverage(x))
           })
 
 

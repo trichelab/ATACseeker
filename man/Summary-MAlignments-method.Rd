@@ -3,7 +3,7 @@
 \docType{methods}
 \name{Summary,MAlignments-method}
 \alias{Summary,MAlignments-method}
-\title{Summary: reads, readLength, genomeSize, coverage}
+\title{summary of object: reads, readLength, genomeSize, coverage}
 \usage{
 \S4method{Summary}{MAlignments}(x)
 }
@@ -11,7 +11,7 @@
 \item{x}{an MAlignments}
 }
 \value{
-estimated coverage (numeric)
+summary of x
 }
 \description{
 specifically, 

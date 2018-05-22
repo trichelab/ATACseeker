@@ -30,11 +30,11 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19",
       # why lapply() by default? 
       # because most laptops will die otherwise!
       if (parallel == TRUE) {
-        return(MAlignmentsList(lapply(bams, getMT)))
-      } else {
         message("Loading multiple BAMs in parallel may kill your machine.")
         message("Set options('mc.cores') beforehand, and beware of swapping.")
         return(MAlignmentsList(mclapply(bams, getMT)))
+      } else {
+        return(MAlignmentsList(lapply(bams, getMT)))
       }
     } else { 
       message("No matching records.")

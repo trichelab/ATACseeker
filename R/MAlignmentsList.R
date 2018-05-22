@@ -66,7 +66,7 @@ setMethod("coverage", signature(x="MAlignmentsList"),
 #' 
 #' @export
 setMethod("runLength", signature(x="MAlignmentsList"),
-          function(x) Summary(x)[, "readLength"])
+          function(x) sapply(x, runLength))
 
 
 #' summary of an MAlignmentsList
@@ -84,26 +84,18 @@ setMethod("Summary", signature(x="MAlignmentsList"),
             # use cached version, if available
             if ("Summary" %in% names(metadata(x))) { 
               dat <- metadata(x)$Summary
+              if (!is.null(names(x))) dat <- dat[names(x),]
             } else { 
-              # sapply(x, Summary) must generate, for each MAlignment `mal`,
-              # 
-              # c(reads=length(mal), 
-              #   readLength=runLength(mal),
-              #   genomeSize=seqlengths(mal)[seqlevelsInUse(mal)],
-              #   coverage=coverage(mal))
-              #
-              # which can then be cached after turning it into a DataFrame.
-              #
-              dat <- DataFrame(sapply(x, Summary))
+              dat <- DataFrame(
+                reads=sapply(x, length),
+                readLength=sapply(x, runLength),
+                genomeSize=sapply(x, yieldSize)
+              ) 
+              dat$coverage <- with(dat, (reads * readLength) / genomeSize)
               if (!is.null(names(x))) rownames(dat) <- names(x)
             }
             
-            # match names if possible 
-            if (!is.null(names(x))) {
-              return(dat[names(x),])
-            } else { 
-              return(dat)
-            }
+            return(dat)
 
           })
 

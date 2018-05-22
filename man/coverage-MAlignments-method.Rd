@@ -3,7 +3,7 @@
 \docType{methods}
 \name{coverage,MAlignments-method}
 \alias{coverage,MAlignments-method}
-\title{estimated read coverage (cached when possible)}
+\title{estimated read coverage}
 \usage{
 \S4method{coverage}{MAlignments}(x)
 }
@@ -14,5 +14,5 @@
 estimated coverage (numeric)
 }
 \description{
-estimated read coverage (cached when possible)
+estimated read coverage
 }
