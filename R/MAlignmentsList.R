@@ -69,8 +69,8 @@ setMethod("runLength", signature(x="MAlignmentsList"),
 #' @export
 setMethod("asBam", signature(file="MAlignmentsList"),
           function(file) {
-            BAMs <- DataFrame(BAM=sapply(x, asBam),
-                              genome=unname(sapply(x, genome)))
+            BAMs <- DataFrame(BAM=sapply(file, asBam),
+                              genome=unname(sapply(file, genome)))
             if (!is.null(names(file))) rownames(BAMs) <- names(file)
             return(BAMs)
           })
