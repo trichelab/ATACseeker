@@ -84,7 +84,7 @@ setMethod("show", signature(object="MAlignmentsList"),
           function(object) {
             cat("MAlignmentsList object of length", length(object), "\n")
             cat("-------\n", sep = "")
-            cat("Summary(object)): presented as a ")
+            cat("Summary(object) returns a ")
             show(Summary(object))
             cat("-------\n", sep = "")
             cat("seqinfo: ", summary(seqinfo(object)), "\n", sep = "")
