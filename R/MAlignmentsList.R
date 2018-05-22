@@ -17,13 +17,9 @@ setClass("MAlignmentsList", contains="GAlignmentsList")
 #' @export
 MAlignmentsList <- function(...) {
   gal <- GenomicAlignments:::GAlignmentsList(...)
-  metadata(gal)$coverage <- sapply(list(...), function(x) attr(x, "coverage"))
-  if (is.null(names(gal))) {
-    message("Warning: creating an MAlignmentsList without element names.")
-  }
+  if (is.null(names(gal))) warning("MAlignmentsList with no element names!")
   mall <- new("MAlignmentsList", gal)
-  # cache this for quick summaries later on:
-  metadata(mall)$properties <- getProperties(mall)
+  metadata(mall)$Summary <- Summary(mall)
   return(mall)
 }
 
@@ -51,56 +47,63 @@ setMethod("getFragmentsPerSample", signature(object="MAlignmentsList"),
 #' 
 #' @return    estimated coverage (numeric vector)
 #'
-#' @import IRanges
+#' @import    IRanges
 #' 
 #' @export
 setMethod("coverage", signature(x="MAlignmentsList"),
-          function(x) {
-            covg <- metadata(x)$coverage
-            # subset by sample name if sample names available 
-            if (!is.null(names(x)) & !is.null(names(covg))) {
-              covg <- covg[names(x)] 
-            }
-            return(covg)
-          })
+          function(x) Summary(x)[, "coverage"])
 
 
-# resurrecting this from the `methods` package for use below...
-setGeneric("getProperties", function(ClassDef) return(ClassDef))
-
-#' element properties for an MAlignmentsList
+#' estimated read length for each element (cached on load)
+#' 
+#' (co-opting a generic from `S4Vectors`)
 #'
-#' (co-opting a defunct `methods` function back into a generic)
+#' @param x   an MAlignmentsList
 #' 
-#' @param ClassDef    an MAlignmentsList
+#' @return    estimated coverage (numeric vector)
+#'
+#' @import    S4Vectors
 #' 
-#' @return            properties for each element, as a DataFrame
+#' @export
+setMethod("runLength", signature(x="MAlignmentsList"),
+          function(x) Summary(x)[, "readLength"])
+
+
+#' summary of an MAlignmentsList
+#'
+#' (generic defined in base, no less)
+#' 
+#' @param x    an MAlignmentsList
+#' 
+#' @return     a DataFrame
 #'
 #' @export
-setMethod("getProperties", signature(ClassDef="MAlignmentsList"),
-          function(ClassDef) {
+setMethod("Summary", signature(x="MAlignmentsList"),
+          function(x) {
 
-            # use cached version, if at all possible
-            if ("properties" %in% names(metadata(ClassDef)) &
-                is(metadata(ClassDef)$properties, "DataFrame")) {
-              # update if necessary 
-              if (!is.null(names(ClassDef)) & 
-                  !identical(rownames(metadata(ClassDef)$properties))) {
-                metadata(ClassDef)$properties <- 
-                  metadata(ClassDef)$properties[names(ClassDef),]
-              }
+            # use cached version, if available
+            if ("Summary" %in% names(metadata(x))) { 
+              dat <- metadata(x)$Summary
             } else { 
-              # otherwise generate a cached version
-              contig <- unique(seqlevels(ClassDef))
-              basepairs <- seqlengths(ClassDef)[contig]
-              dat <- DataFrame(reads=getFragmentsPerSample(ClassDef),
-                               contig=rep(contig, length(ClassDef)),
-                               basepairs=rep(basepairs, length(ClassDef)),
-                               coverage=paste0(round(coverage(ClassDef)), "x"))
-              if (!is.null(names(ClassDef))) rownames(dat) <- names(ClassDef)
-              metadata(ClassDef)$properties <- dat
+              # sapply(x, Summary) must generate, for each MAlignment `mal`,
+              # 
+              # c(reads=length(mal), 
+              #   readLength=runLength(mal),
+              #   genomeSize=seqlengths(mal)[seqlevelsInUse(mal)],
+              #   coverage=coverage(mal))
+              #
+              # which can then be cached after turning it into a DataFrame.
+              #
+              dat <- DataFrame(sapply(x, Summary))
+              if (!is.null(names(x))) rownames(dat) <- names(x)
             }
-            return(metadata(ClassDef)$properties)
+            
+            # match names if possible 
+            if (!is.null(names(x))) {
+              return(dat[names(x),])
+            } else { 
+              return(dat)
+            }
 
           })
 
@@ -114,8 +117,8 @@ setMethod("show", signature(object="MAlignmentsList"),
           function(object) {
             cat("MAlignmentsList object of length", length(object), "\n")
             cat("-------\n", sep = "")
-            cat("Element summary from getProperties(object):\n")
-            show(getProperties(object))
+            cat("Summary(object):\n")
+            show(Summary(object))
             cat("-------\n", sep = "")
             cat("seqinfo: ", summary(seqinfo(object)), "\n", sep = "")
           })
