@@ -35,7 +35,7 @@ MAlignments <- function(gal, bam) {
 #' @export
 setMethod("coverage", signature(x="MAlignments"),
           function(x) {
-            unname( (length(x) * runLength(x)) / yieldSize(x) )
+            unname( (length(x) * runLength(x)) / runValue(x) )
           })
 
 
@@ -59,9 +59,9 @@ setMethod("runLength", signature(x="MAlignments"),
 #' @return    genome size 
 #'
 #' @export
-setMethod("yieldSize", signature(object="MAlignments"),
-          function(object) {
-            unname(seqlengths(object)[seqlevelsInUse(object)])
+setMethod("runValue", signature(x="MAlignments"),
+          function(x) {
+            unname(seqlengths(x)[seqlevelsInUse(x)])
           })
 
 
@@ -79,7 +79,7 @@ setMethod("Summary", signature(x="MAlignments"),
           function(x) {
             c(reads=length(x),
               readLength=runLength(x),
-              genomeSize=yieldSize(x),
+              genomeSize=runValue(x),
               coverage=coverage(x))
           })
 

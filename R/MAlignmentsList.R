@@ -116,7 +116,7 @@ setMethod("Summary", signature(x="MAlignmentsList"),
             } else {
               dat <- DataFrame(reads=sapply(x, length),
                                readLength=sapply(x, runLength),
-                               genomeSize=sapply(x, yieldSize))
+                               genomeSize=sapply(x, runValue))
               if (!is.null(names(x))) rownames(dat) <- names(x)
               dat$genomeCoverage <- round(with(dat,
                                                (reads*readLength) / genomeSize))
