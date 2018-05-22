@@ -8,6 +8,7 @@ setClass("MAlignments",
                         runLength="numeric"), 
          contains="GAlignments")
 
+
 #' wrap a GAlignments for easier stats
 #'
 #' @param gal         a GAlignments
@@ -97,21 +98,51 @@ setMethod("show", signature(object="MAlignments"),
           })
 
 
-#' recreate the BamViews needed to call variants 
+#' fetch the filename for an MAlignments
 #'
-#' @param subject   an MAlignments
+#' @param file      an MAlignments
+#' 
+#' @return          a BAM filename (string)
+#'
+#' @import          Rsamtools
+#'
+#' @export
+setMethod("asBam", signature(file="MAlignments"),
+          function(file) {
+            return(file@bam)
+          })
+
+
+#' fetch the header from an MAlignments' original BAM 
+#'
+#' @param bamRanges an MAlignments
 #' 
 #' @return          a BamViews object
 #'
 #' @import          Rsamtools
 #'
 #' @export
-setMethod("Views", signature(subject="MAlignments"),
-          function(subject) {
-            bam <- subject@bam
+setMethod("scanBamHeader", signature(files="MAlignments"),
+          function(files) {
+            return(scanBamHeader(asBam(files)))
+          })
+
+
+#' recreate the BamViews used to load an MAlignments
+#'
+#' @param bamRanges an MAlignments
+#' 
+#' @return          a BamViews object
+#'
+#' @import          Rsamtools
+#'
+#' @export
+setMethod("BamViews", signature(bamRanges="MAlignments"),
+          function(bamRanges) {
+            bam <- bamRanges@bam
             bai <- paste0(bam, ".bai")
-            bamRanges <- as(seqinfo(subject)[seqlevelsInUse(subject)],"GRanges")
-            BamViews(bam=bam, bai=bai, bamRanges=bamRanges)
+            gr <- as(seqinfo(bamRanges)[seqlevelsInUse(bamRanges)], "GRanges")
+            BamViews(bam=bam, bai=bai, bamRanges=gr)
           })
 
 
