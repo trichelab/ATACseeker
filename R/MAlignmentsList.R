@@ -21,6 +21,8 @@ MAlignmentsList <- function(...) {
   mall <- new("MAlignmentsList", gal)
   message("Caching element summary statistics...") 
   metadata(mall)$Summary <- Summary(mall)
+  message("...done. Caching BAM file listings...")
+  metadata(mall)$asBam <- asBam(mall)
   message("...done.")
   return(mall)
 }
@@ -60,18 +62,23 @@ setMethod("runLength", signature(x="MAlignmentsList"),
 #' 
 #' (co-opting a generic from `Rsamtools`)
 #'
-#' @param x   an MAlignmentsList
+#' @param file  an MAlignmentsList
 #' 
-#' @return    estimated coverage (numeric vector)
+#' @return      BAM file summary for the MAlignmentsList 
 #'
-#' @import    S4Vectors
+#' @import      S4Vectors
 #' 
 #' @export
 setMethod("asBam", signature(file="MAlignmentsList"),
           function(file) {
-            BAMs <- DataFrame(BAM=sapply(file, asBam),
-                              genome=unname(sapply(file, genome)))
-            if (!is.null(names(file))) rownames(BAMs) <- names(file)
+            if ("asBam" %in% names(metadata(file))) {
+              BAMs <- metadata(file)$asBam
+            } else {
+              BAMs <- DataFrame(BAM=sapply(file, asBam),
+                                genome=unname(sapply(file, genome)))
+              if (!is.null(names(file))) rownames(BAMs) <- names(file)
+            } 
+            if (!is.null(names(file))) BAMs <- BAMs[names(file), ] 
             return(BAMs)
           })
 

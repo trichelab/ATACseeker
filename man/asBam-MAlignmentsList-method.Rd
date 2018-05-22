@@ -8,10 +8,10 @@
 \S4method{asBam}{MAlignmentsList}(file)
 }
 \arguments{
-\item{x}{an MAlignmentsList}
+\item{file}{an MAlignmentsList}
 }
 \value{
-estimated coverage (numeric vector)
+BAM file summary for the MAlignmentsList
 }
 \description{
 (co-opting a generic from `Rsamtools`)
