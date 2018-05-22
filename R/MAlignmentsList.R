@@ -17,9 +17,11 @@ setClass("MAlignmentsList", contains="GAlignmentsList")
 #' @export
 MAlignmentsList <- function(...) {
   gal <- GenomicAlignments:::GAlignmentsList(...)
-  if (is.null(names(gal))) warning("MAlignmentsList with no element names!")
+  if (is.null(names(gal))) warning("This MAlignmentsList has no element names!")
   mall <- new("MAlignmentsList", gal)
+  message("Caching element summary statistics...") 
   metadata(mall)$Summary <- Summary(mall)
+  message("...done.")
   return(mall)
 }
 
