@@ -38,10 +38,17 @@ callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
                              read_length=as.integer(median(qwidth(mal))-1), 
                              which=as(seqinfo(mal)[mtChr], "GRanges"),
                              indels=TRUE)
-  filters <- VariantCallingFilters(read.count, p.lower)
+  
+  message("Tallying variants...") 
   tallied <- tallyVariants(asBam(mal), pars)
+
+  message("QA'ing variants...") 
   QAed <- qaVariants(tallied)
+
+  message("Calling variants...") 
+  filters <- VariantCallingFilters(read.count, p.lower)
   res <- callVariants(QAed, calling.filters=filters)
+
   sampleNames(res) <- gsub(paste0(".", mtGenome), "", 
                            gsub("\\.bam", "", basename(asBam(mal))))
   res$PASS <- apply(softFilterMatrix(res), 1, all) == 1
