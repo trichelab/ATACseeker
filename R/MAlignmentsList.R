@@ -19,6 +19,7 @@ MAlignmentsList <- function(...) {
   gal <- GenomicAlignments:::GAlignmentsList(...)
   if (is.null(names(gal))) warning("MAlignmentsList with no element names!")
   mall <- new("MAlignmentsList", gal)
+  metadata(mall)$Summary <- Summary(mall)
   return(mall)
 }
 
@@ -53,6 +54,26 @@ setMethod("runLength", signature(x="MAlignmentsList"),
           function(x) sapply(x, runLength))
 
 
+#' list the BAM files and their aligned genomes for MAlignmentsList elements
+#' 
+#' (co-opting a generic from `Rsamtools`)
+#'
+#' @param x   an MAlignmentsList
+#' 
+#' @return    estimated coverage (numeric vector)
+#'
+#' @import    S4Vectors
+#' 
+#' @export
+setMethod("asBam", signature(file="MAlignmentsList"),
+          function(file) {
+            BAMs <- DataFrame(BAM=sapply(x, asBam),
+                              genome=unname(sapply(x, genome)))
+            if (!is.null(names(file))) rownames(BAMs) <- names(file)
+            return(BAMs)
+          })
+
+
 #' summary of an MAlignmentsList
 #'
 #' (generic defined in base, no less)
@@ -64,14 +85,19 @@ setMethod("runLength", signature(x="MAlignmentsList"),
 #' @export
 setMethod("Summary", signature(x="MAlignmentsList"),
           function(x) {
-             
-            dat <- DataFrame(reads=sapply(x, length),
-                             readLength=sapply(x, runLength),
-                             genomeSize=sapply(x, yieldSize))
-            dat$genomeCoverage <- round(with(dat,(reads*readLength)/genomeSize))
-            if (!is.null(names(x))) rownames(dat) <- names(x)
+            if ("Summary" %in% names(metadata(x))) {
+              dat <- metadata(x)$Summary
+            } else {
+              dat <- DataFrame(reads=sapply(x, length),
+                               readLength=sapply(x, runLength),
+                               genomeSize=sapply(x, yieldSize))
+              if (!is.null(names(x))) rownames(dat) <- names(x)
+              dat$genomeCoverage <- round(with(dat,
+                                               (reads*readLength) / genomeSize))
+            }
+            # try to make the most of cached summaries... 
+            if (!is.null(names(x))) dat <- dat[names(x), ] 
             return(dat)
-
           })
 
 
