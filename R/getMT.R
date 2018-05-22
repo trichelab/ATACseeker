@@ -25,6 +25,7 @@ getMT <- function(bam, chrM="chrM", mtGenome="hg19",plotMAPQ=FALSE,filter=TRUE){
     if (nrow(bam) > 0) {
       bams <- bam$BAM
       names(bams) <- colnames(bam)
+      # why lapply()? because most laptops will die before 3000 runs otherwise
       return(MAlignmentsList(lapply(bams, getMT)))
     } else { 
       message("No matching records.")
