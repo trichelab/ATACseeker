@@ -14,5 +14,5 @@
 estimated coverage (numeric vector)
 }
 \description{
-estimated read coverage for each element (cached on load)
+(co-opting a generic from `IRanges`)
 }

@@ -3,7 +3,7 @@
 \docType{methods}
 \name{show,MAlignmentsList-method}
 \alias{show,MAlignmentsList-method}
-\title{display alignment collections with read coverage estimates}
+\title{display alignment collections with element summaries}
 \usage{
 \S4method{show}{MAlignmentsList}(object)
 }
@@ -11,5 +11,5 @@
 \item{objects}{an MAlignmentsList}
 }
 \description{
-display alignment collections with read coverage estimates
+display alignment collections with element summaries
 }

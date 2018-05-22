@@ -16,35 +16,89 @@ setClass("MAlignmentsList", contains="GAlignmentsList")
 #' 
 #' @export
 MAlignmentsList <- function(...) {
-  gal <- GAlignmentsList(...)
-  metadata(gal)$coverage <- lapply(gal, function(x) attr(x, "coverage"))
+  gal <- GenomicAlignments:::GAlignmentsList(...)
+  metadata(gal)$coverage <- sapply(list(...), function(x) attr(x, "coverage"))
+  if (is.null(names(gal))) {
+    message("Warning: creating an MAlignmentsList without element names.")
+  }
   mall <- new("MAlignmentsList", gal)
   return(mall)
 }
 
 
+#' number of aligned fragments per element
+#'
+#' (co-opting a generic from chromVAR to get reads per element)
+#' 
+#' @param object  an MAlignmentsList
+#' 
+#' @return        the fragments (length) for each element
+#'
+#' @import        chromVAR
+#'
+#' @export
+setMethod("getFragmentsPerSample", signature(object="MAlignmentsList"),
+          function(object) sapply(object, length))
+
+
 #' estimated read coverage for each element (cached on load)
 #' 
+#' (co-opting a generic from `IRanges`)
+#'
 #' @param x   an MAlignmentsList
 #' 
 #' @return    estimated coverage (numeric vector)
 #'
+#' @import IRanges
+#' 
 #' @export
 setMethod("coverage", signature(x="MAlignmentsList"),
-          function(x) metadata(x)$coverage[colnames(x)])
+          function(x) {
+            covg <- metadata(x)$coverage
+            # subset by sample name if sample names available 
+            if (!is.null(names(x)) & !is.null(names(covg))) {
+              covg <- covg[names(x)] 
+            }
+            return(covg)
+          })
 
 
-#' display alignment collections with read coverage estimates
+# resurrecting this from the `methods` package for use below...
+setGeneric("getProperties", function(ClassDef) return(ClassDef))
+
+#' element properties for an MAlignmentsList
+#'
+#' (co-opting a defunct `methods` function back into a generic)
+#' 
+#' @param ClassDef    an MAlignmentsList
+#' 
+#' @return            properties for each element, as a DataFrame
+#'
+#' @export
+setMethod("getProperties", signature(ClassDef="MAlignmentsList"),
+          function(ClassDef) {
+            contig <- unique(seqlevels(ClassDef))
+            basepairs <- seqlengths(ClassDef)[contig]
+            dat <- DataFrame(reads=getFragmentsPerSample(ClassDef),
+                             contig=rep(contig, length(ClassDef)),
+                             basepairs=rep(basepairs, length(ClassDef)),
+                             coverage=paste0(round(coverage(ClassDef)), "x"))
+            if (!is.null(names(ClassDef))) rownames(dat) <- names(ClassDef)
+            return(dat)
+          })
+
+
+#' display alignment collections with element summaries
 #'
 #' @param objects   an MAlignmentsList
 #' 
 #' @export
 setMethod("show", signature(object="MAlignmentsList"),
           function(object) {
-            cat("MAlignmentsList object of length ", length(object), "\n")
-            cat("Summary of elements:", "\n")
-            dat <- DataFrame(reads=sapply(object, length),
-                             coverage=coverage(object))
-            rownames(dat) <- names(object)
-            show(dat)
+            cat("MAlignmentsList object of length", length(object), "\n")
+            cat("-------\n", sep = "")
+            cat("Element summary by getProperties():\n")
+            show(getProperties(object))
+            cat("-------\n", sep = "")
+            cat("seqinfo: ", summary(seqinfo(object)), "\n", sep = "")
           })
