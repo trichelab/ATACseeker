@@ -5,7 +5,7 @@
 \title{call mitochondrial variants from an MAlignments object}
 \usage{
 callMT(mal, p.lower = 0.1, read.count = 2L, total.count = 10L,
-  rCRS = FALSE, parallel = FALSE)
+  rCRS = FALSE)
 }
 \arguments{
 \item{mal}{an MAlignments (or, potentially, an MAlignmentsList)}
@@ -17,8 +17,6 @@ callMT(mal, p.lower = 0.1, read.count = 2L, total.count = 10L,
 \item{total.count}{minimum total read depth required to keep a variant (10)}
 
 \item{rCRS}{lift to rCRS if not already hg38/GRCh38? (FALSE)}
-
-\item{parallel}{try to run in parallel? (FALSE)}
 }
 \description{
 FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,

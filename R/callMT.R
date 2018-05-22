@@ -8,7 +8,6 @@
 #' @param read.count  minimum alt read depth required to support a variant (2)
 #' @param total.count minimum total read depth required to keep a variant (10)
 #' @param rCRS        lift to rCRS if not already hg38/GRCh38? (FALSE) 
-#' @param parallel    try to run in parallel? (FALSE) 
 #'
 #' @import gmapR
 #' @import VariantTools
@@ -16,15 +15,7 @@
 #' @import GmapGenome.Hsapiens.hg19.chrM
 #'
 #' @export
-callMT <- function(mal, p.lower=.1, read.count=2L, 
-                   total.count=10L, rCRS=FALSE, parallel=FALSE){
-
-  # infuriating bug, need to revisit this
-  if (parallel == TRUE) { 
-    register(MulticoreParam(detectCores()))
-  } else { 
-    register(SerialParam())
-  } 
+callMT <- function(mal, p.lower=.1, read.count=2L, total.count=10L, rCRS=FALSE){
 
   if (!is(mal, "MAlignments") & !is(mal, "MAlignmentsList")) {
     stop("callMT needs an MAlignments or MAlignmentsList to call variants.")
