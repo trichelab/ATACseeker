@@ -18,14 +18,31 @@ setClass("MAlignmentsList", contains="GAlignmentsList")
 MAlignmentsList <- function(...) {
   gal <- GenomicAlignments:::GAlignmentsList(...)
   if (is.null(names(gal))) warning("This MAlignmentsList has no element names!")
-  mall <- new("MAlignmentsList", gal)
-  message("Caching element summary statistics...") 
-  metadata(mall)$Summary <- Summary(mall)
-  message("...done. Caching BAM file listings...")
-  metadata(mall)$asBam <- asBam(mall)
-  message("...done.")
-  return(mall)
+  updateObject(new("MAlignmentsList", gal))
 }
+
+
+#' cache summary stats and perform any necessary updates for an MAlignmentsList
+#' 
+#' @param object    an MAlignmentsList, usually lacking some cached information
+#'
+#' @return          an updated MAlignmentsList with cached metadata summaries
+#'
+#' @export
+setMethod("updateObject", signature(object="MAlignmentsList"),
+          function(object) { 
+            if (!"Summary" %in% names(metadata(object))) {
+              message("Caching element summaries in metadata(object)$Summary:") 
+              metadata(object)$Summary <- Summary(object)
+              message("Done.")
+            }
+            if (!"asBam" %in% names(metadata(object))) {
+              message("Caching BAM file listings in metadata(object)$asBam:")
+              metadata(object)$asBam <- asBam(object)
+              message("Done.")
+            }
+            return(object)
+          }) 
 
 
 #' estimated read coverage for each element (cached on load)
