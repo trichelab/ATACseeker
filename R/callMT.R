@@ -16,8 +16,8 @@
 #' @export
 callMT <- function(mal, ..., rCRS=FALSE, verbose=FALSE){
 
-  if (!is(mal, "GAlignments") & !is(mal, "MAlignmentsList")) {
-    stop("callMT needs a GAlignments or MAlignmentsList to call variants.")
+  if (!is(mal, "MAlignments") & !is(mal, "MAlignmentsList")) {
+    stop("callMT needs a MAlignments or MAlignmentsList to call variants.")
   } else if (is(mal, "MAlignmentsList")) { 
     message("Variant-calling an MAlignmentsList. This may melt your machine.")
     return(MVRangesList(lapply(mal, callMT)))

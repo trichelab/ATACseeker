@@ -13,7 +13,11 @@ setClass("MVRangesList", contains="VRangesList")
 #' @return        an MVRangesList
 #' 
 #' @export
-MVRangesList <- function(vrl) new("MVRangesList", vrl)
+MVRangesList <- function(...) {
+  vrl <- VariantAnnotation:::VRangesList(...)
+  if (is.null(names(vrl))) warning("This MVRangesList has no element names!")
+  new("MVRangesList", vrl)
+}
 
 
 #' estimated read coverage (recorded from the called MAlignments)

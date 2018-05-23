@@ -4,7 +4,7 @@
 \alias{MVRangesList}
 \title{wrap a VRangesList for mitochondrial use}
 \usage{
-MVRangesList(vrl)
+MVRangesList(...)
 }
 \arguments{
 \item{vrl}{the VRangesList}
