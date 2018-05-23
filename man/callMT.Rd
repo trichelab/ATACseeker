@@ -4,17 +4,12 @@
 \alias{callMT}
 \title{call mitochondrial variants from an MAlignments object}
 \usage{
-callMT(mal, p.lower = 0.1, read.count = 2L, total.count = 10L,
-  rCRS = FALSE)
+callMT(mal, ..., rCRS = FALSE)
 }
 \arguments{
 \item{mal}{an MAlignments (or, potentially, an MAlignmentsList)}
 
-\item{p.lower}{lower bound on binomial probability for a variant (0.1)}
-
-\item{read.count}{minimum alt read depth required to support a variant (2)}
-
-\item{total.count}{minimum total read depth required to keep a variant (10)}
+\item{...}{other optional arguments to pass to callVariants}
 
 \item{rCRS}{lift to rCRS if not already hg38/GRCh38? (FALSE)}
 }

@@ -2,7 +2,7 @@ Package: ATACseeker
 Type: Package
 Title: Utilities for ATACseq QC, differential accessibility, and integration
 Version: 0.9.43
-Date: 2018-05-22
+Date: 2018-05-23
 Author: Tim Triche, Jr., Asif Zubair, Ben Johnson
 Maintainer: Tim Triche, Jr. <tim.triche@gmail.com>
 Description: Some ATACseq tools with marginal documentation

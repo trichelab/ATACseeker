@@ -8,7 +8,7 @@
 mtHGVS <- function(mvr) { 
 
   # baseline notation, assuming mostly SNVs 
-  nms <- paste0("g.", pos(mvr), ref(mvr), ">", alt(mvr))
+  nms <- paste0(pos(mvr), ref(mvr), ">", alt(mvr))
 
   # deletions
   sbdel <- which((nchar(ref(mvr)) - nchar(alt(mvr))) == 1)

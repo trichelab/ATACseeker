@@ -49,8 +49,7 @@ setMethod("type", signature(x="MVRanges"),
 #' @export
 setMethod("pos", signature(x="MVRanges"), 
           function(x) {
-            loci <- gsub(paste0(seqlevels(x),":"), "", as.character(granges(x)))
-            names(loci) <- mtHGVS(x)
+            loci <- gsub(paste0(seqlevels(x),":"),"g.",as.character(granges(x)))
             return(loci)
           })
 
