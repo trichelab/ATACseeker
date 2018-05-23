@@ -3,20 +3,18 @@
 #' @import VariantAnnotation
 #' 
 #' @exportClass MVRangesList
-setClass("MVRangesList", contains="VRangesList")
+setClass("MVRangesList", contains="SimpleVRangesList")
 
 
 #' wrap a VRangesList for mitochondrial use
 #'
-#' @param   vrl   the VRangesList
+#' @param ...     the MVRanges elements forming the MVRangesList
 #'
-#' @return        an MVRangesList
+#' @return        the MVRangesList
 #' 
 #' @export
 MVRangesList <- function(...) {
-  vrl <- VariantAnnotation:::VRangesList(...)
-  if (is.null(names(vrl))) warning("This MVRangesList has no element names!")
-  new("MVRangesList", vrl)
+  new("MVRangesList", GenomicRangesList(...), elementType = "MVRanges")
 }
 
 

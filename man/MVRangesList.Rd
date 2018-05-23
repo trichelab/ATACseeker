@@ -7,10 +7,10 @@
 MVRangesList(...)
 }
 \arguments{
-\item{vrl}{the VRangesList}
+\item{...}{the MVRanges elements forming the MVRangesList}
 }
 \value{
-an MVRangesList
+the MVRangesList
 }
 \description{
 wrap a VRangesList for mitochondrial use
