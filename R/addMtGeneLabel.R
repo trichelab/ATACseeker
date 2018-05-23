@@ -11,6 +11,9 @@
 #' @export 
 addMtGeneLabel <- function(mtCalls) {
 
+  message("Warning: addMtGeneLabel is outdated.")
+  message("Use built-in rCRS annotations instead!")
+
   mtCalls$bp <- start(mtCalls)
   mtCalls$gene <- "Non-Coding" # default 
   mtChr <- as.character(unique(seqnames(mtCalls)))

@@ -10,7 +10,7 @@
 #' 
 #' @return  whatever binPlots returns
 #' 
-#' @import  Repitools
+#' @importFrom Repitools featureScores binPlots
 #'
 #' @export
 tssQcPlot <- function(x, anno, ordering, span=5000, smoothing=50, ...) {
@@ -20,7 +20,6 @@ tssQcPlot <- function(x, anno, ordering, span=5000, smoothing=50, ...) {
     return(x)
   }
   
-  ## require(Repitools)
   if (is(x, 'GAlignmentPairs')) {
     covs <- featureScores(as(c(strip(right(x)), strip(left(x))), 'GRanges'),
                           anno, up=span, down=span, freq=100, s.width=smoothing)
