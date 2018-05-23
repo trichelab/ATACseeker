@@ -4,7 +4,7 @@
 \alias{callMT}
 \title{call mitochondrial variants from an MAlignments object}
 \usage{
-callMT(mal, ..., rCRS = FALSE)
+callMT(mal, ..., rCRS = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{mal}{an MAlignments (or, potentially, an MAlignmentsList)}
@@ -12,6 +12,8 @@ callMT(mal, ..., rCRS = FALSE)
 \item{...}{other optional arguments to pass to callVariants}
 
 \item{rCRS}{lift to rCRS if not already hg38/GRCh38? (FALSE)}
+
+\item{verbose}{be verbose? (FALSE; turn on for debugging purposes)}
 }
 \description{
 FIXME: figure out a way to reprocess extracted chrM/MT reads against rCRS,

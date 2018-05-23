@@ -8,7 +8,7 @@
 \S4method{getAnnotations}{MVRanges}(annotations)
 }
 \arguments{
-\item{mvr}{an MVRanges}
+\item{annotations}{an MVRanges}
 }
 \value{
 a GRanges of annotations, if present, or else NULL

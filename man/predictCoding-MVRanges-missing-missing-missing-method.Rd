@@ -9,10 +9,10 @@
   seqSource, varAllele, ...)
 }
 \arguments{
-\item{mvr}{an MVRanges}
+\item{query}{an MVRanges}
 }
 \value{
-an rCRS MVRanges with CONSEQUENCE, MTCSQ, and (REF/VAR)(CODON/AA)
+an rCRS MVRanges with CONSEQUENCE, MTCSQ, (REF/VAR)(CODON/AA)
 }
 \description{
 Given an rCRS-situated set of variant calls, predict which may be coding,

@@ -9,7 +9,7 @@
   ...)
 }
 \arguments{
-\item{mvr}{an MVRanges, almost always after predictCoding(MVRanges)}
+\item{query}{an MVRanges, almost always after predictCoding(MVRanges)}
 }
 \value{
 MitImpact output for variants where information is available

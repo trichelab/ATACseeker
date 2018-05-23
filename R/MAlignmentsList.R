@@ -141,3 +141,15 @@ setMethod("show", signature(object="MAlignmentsList"),
             cat("-------\n", sep = "")
             cat("seqinfo: ", summary(seqinfo(object)), "\n", sep = "")
           })
+
+
+#' call variants (shockingly enough) 
+#'
+#' @param x   an MAlignmentsList
+#' 
+#' @return    a MVRangesList object
+#'
+#' @import    VariantTools
+#'
+#' @export
+setMethod("callVariants", signature(x="MAlignmentsList"), function(x) callMT(x))

@@ -8,7 +8,7 @@
 \S4method{encoding}{MVRanges}(x)
 }
 \arguments{
-\item{mvr}{an MVRanges}
+\item{x}{an MVRanges}
 }
 \value{
 subset of MVRanges passing filters within protein-coding regions

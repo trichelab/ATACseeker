@@ -44,12 +44,13 @@ setMethod("type", signature(x="MVRanges"),
 #' 
 #' @param x   an MVRanges
 #' 
-#' @return    a named CHARACTER vector of variant position strings for MitImpact
+#' @return    a named CHARACTER vector of variant positions for MitImpact/HGVS
 #'
 #' @export
 setMethod("pos", signature(x="MVRanges"), 
           function(x) {
-            loci <- gsub(paste0(seqlevels(x),":"),"g.",as.character(granges(x)))
+            mtChr <- grep("(chrM|MT)", seqlevels(x), value=TRUE)
+            loci <- gsub(paste0(mtChr,":"), "g.", as.character(granges(x)))
             return(loci)
           })
 
@@ -138,9 +139,9 @@ setMethod("annotation", signature(object="MVRanges"),
 
 #' simple helper to retrieve annotations (if present) from an MVRanges
 #'
-#' @param mvr an MVRanges
+#' @param annotations   an MVRanges
 #'
-#' @return    a GRanges of annotations, if present, or else NULL
+#' @return              a GRanges of annotations, if present, or else NULL
 #'
 #' @export
 setMethod("getAnnotations", signature(annotations="MVRanges"), 
@@ -155,7 +156,7 @@ setMethod("getAnnotations", signature(annotations="MVRanges"),
 
 #' simple helper to retrieve PASS'ing, protein-coding variants from MVRanges
 #'
-#' @param mvr an MVRanges
+#' @param x   an MVRanges
 #'
 #' @return    subset of MVRanges passing filters within protein-coding regions
 #'
@@ -202,11 +203,11 @@ setMethod("encoding", signature(x="MVRanges"),
 #'
 #' Unlike the other predictCoding methods, many of these will usually be empty. 
 #'
-#' @param mvr an MVRanges
+#' @param  query  an MVRanges
 #'
-#' @return    an rCRS MVRanges with CONSEQUENCE, MTCSQ, and (REF/VAR)(CODON/AA)
+#' @return        an rCRS MVRanges with CONSEQUENCE, MTCSQ, (REF/VAR)(CODON/AA)
 #'
-#' @import    Biostrings
+#' @import        Biostrings
 #'
 #' @export
 setMethod("predictCoding", # mitochondrial annotations kept internally
@@ -235,11 +236,11 @@ setMethod("predictCoding", # mitochondrial annotations kept internally
 #'
 #' Note: this method requires an internet connection. For now, at least.
 #'
-#' @param mvr an MVRanges, almost always after predictCoding(MVRanges)
+#' @param query   an MVRanges, almost always after predictCoding(MVRanges)
 #'
-#' @return    MitImpact output for variants where information is available 
+#' @return        MitImpact output for variants where information is available 
 #'
-#' @import    jsonlite
+#' @import        jsonlite
 #'
 #' @export
 setMethod("summarizeVariants", signature(query="MVRanges","missing","missing"),

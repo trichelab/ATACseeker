@@ -6,6 +6,7 @@
 #' @param mal         an MAlignments (or, potentially, an MAlignmentsList) 
 #' @param ...         other optional arguments to pass to callVariants
 #' @param rCRS        lift to rCRS if not already hg38/GRCh38? (FALSE) 
+#' @param verbose     be verbose? (FALSE; turn on for debugging purposes)
 #'
 #' @import gmapR
 #' @import VariantTools
@@ -13,7 +14,7 @@
 #' @import GmapGenome.Hsapiens.hg19.chrM
 #'
 #' @export
-callMT <- function(mal, ..., rCRS=FALSE){
+callMT <- function(mal, ..., rCRS=FALSE, verbose=FALSE){
 
   if (!is(mal, "GAlignments") & !is(mal, "MAlignmentsList")) {
     stop("callMT needs a GAlignments or MAlignmentsList to call variants.")
@@ -37,24 +38,24 @@ callMT <- function(mal, ..., rCRS=FALSE){
                              which=as(seqinfo(mal)[mtChr], "GRanges"),
                              indels=TRUE)
   
-  message("Tallying variants...") 
+  if (verbose) message("Tallying variants...") 
   tallied <- tallyVariants(fileName(mal), pars)
 
-  message("QA'ing variants...") 
+  if (verbose) message("QA'ing variants...") 
   QAed <- qaVariants(tallied)
 
-  message("Calling variants...") 
+  if (verbose) message("Calling variants...") 
   filters <- VariantCallingFilters(...)
   res <- callVariants(QAed, calling.filters=filters)
 
-  message("Filtering variants...")
+  if (verbose) message("Filtering variants...")
   sampleNames(res) <- gsub(paste0(".", mtGenome), "", 
                            gsub("\\.bam", "", basename(fileName(mal))))
   res$PASS <- apply(softFilterMatrix(res), 1, all) == 1
   res$VAF <- altDepth(res) / totalDepth(res)
   genome(res) <- mtGenome
 
-  message("Formatting variants...") 
+  if (verbose) message("Formatting variants...") 
   mvr <- MVRanges(res, coverage(mal))
   if (rCRS == TRUE) mvr <- rCRS(mvr)
   names(mvr) <- mtHGVS(mvr)

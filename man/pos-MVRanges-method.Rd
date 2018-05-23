@@ -11,7 +11,7 @@
 \item{x}{an MVRanges}
 }
 \value{
-a named CHARACTER vector of variant position strings for MitImpact
+a named CHARACTER vector of variant positions for MitImpact/HGVS
 }
 \description{
 positions of variants (for feeding to MitImpact and friends)
