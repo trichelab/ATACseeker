@@ -19,7 +19,7 @@ callMT <- function(mal, ..., rCRS=FALSE){
     stop("callMT needs a GAlignments or MAlignmentsList to call variants.")
   } else if (is(mal, "MAlignmentsList")) { 
     message("Variant-calling an MAlignmentsList. This may melt your machine.")
-    return(VRangesList(lapply(mal, callMT, parallel=parallel)))
+    return(VRangesList(lapply(mal, callMT)))
   }
 
   mtChr <- seqlevelsInUse(mal)
