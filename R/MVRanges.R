@@ -50,7 +50,7 @@ setMethod("type", signature(x="MVRanges"),
 setMethod("pos", signature(x="MVRanges"), 
           function(x) {
             mtChr <- grep("(chrM|MT)", seqlevels(x), value=TRUE)
-            loci <- gsub(paste0(mtChr,":"), "g.", as.character(granges(x)))
+            loci <- gsub(paste0(mtChr,":"), "", as.character(granges(x)))
             return(loci)
           })
 
@@ -248,7 +248,7 @@ setMethod("summarizeVariants", signature(query="MVRanges","missing","missing"),
            
             getImpact <- function(pos) {
               url <- paste("http://mitimpact.css-mendel.it", "api", "v2.0",
-                           "genomic_position", pos, sep="/")
+                           "genomic_position", sub("^g\\.", "", pos), sep="/")
               res <- as.data.frame(read_json(url, simplifyVector=TRUE)$variants)
               if (nrow(res) > 0) {
                 res$genomic <- with(res, paste0("g.", Start, Ref, ">", Alt))
