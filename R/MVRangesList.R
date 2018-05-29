@@ -29,6 +29,84 @@ setMethod("coverage", signature(x="MVRangesList"),
           function(x) sapply(x, coverage))
 
 
+#' load counts
+#' 
+#' @param object  an MVRangesList
+#' @param value   a RangedSummarizedExperiment with identical colnames
+#' 
+#' @export
+setReplaceMethod("counts", 
+                 signature(object="MVRangesList", 
+                           value="RangedSummarizedExperiment"),
+                 function(object, value) {
+                   if (!identical(names(object), colnames(value))) {
+                     stop("Error: colnames(value) doesn't match names(object)!")
+                   } else if (!"counts" %in% names(assays(value))) {
+                     stop("Error: value must have an assay named `counts`!")
+                   } else { 
+                     metadata(object)$counts <- value[, names(object)]
+                     return(object)
+                   }
+                 })
+
+
+#' retrieve counts
+#' 
+#' @param object  an MVRangesList
+#' 
+#' @return        counts (a RangedSummarizedExperiment)
+#'
+#' @export
+setMethod("counts", signature(object="MVRangesList"), 
+          function(object) metadata(object)$counts)
+
+
+#' compute deviations from expected counts for a list of genotyped specimens 
+#'
+#' @param object        an MVRangesList with an RSE in metadata(object)$counts
+#' @param annotations   RangedSummarizedExperiment with motif matches for object
+#'
+#' @return              a chromVARDeviations object 
+#'
+#' @import chromVAR
+#' 
+#' @export
+setMethod("computeDeviations", 
+          signature(object="MVRangesList", 
+                    annotations="RangedSummarizedExperiment"),
+          function(object, annotations) { 
+            if (!"counts" %in% names(metadata(object))) {
+              stop("Error: metadata(object)$counts is currently empty.")
+            } else {
+              computeDeviations(object=counts(object), annotations=annotations)
+            }
+          })
+
+
+#' retrieve deviations
+#' 
+#' @param object  an MVRangesList
+#' 
+#' @return        deviations
+#'
+#' @export
+setMethod("deviations", signature(object="MVRangesList"), 
+          function(object) metadata(object)$deviations)
+
+
+#' for sample similarity clustering, add a coercion
+#'
+#' @param from    an MVRangesList
+#' 
+#' @return        deviations
+#'
+#' @import        chromVAR
+#'
+#' @export
+setAs(from="MVRangesList", to="chromVARDeviations", 
+      function(from) deviations(from))
+
+
 #' simple helper to retrieve PASS'ing, coding variants from an MVRangesList
 #'
 #' @param x   an MVRangesList
@@ -53,5 +131,12 @@ setMethod("show", signature(object="MVRangesList"),
           function(object) {
             callNextMethod()
             coverages <- paste0(round(unname(sapply(object, coverage))), "x")
-            cat(S4Vectors:::labeledLine("coverage", coverages), "\n")
+            cat(S4Vectors:::labeledLine("coverage", coverages))
+            if ("counts" %in% names(metadata(object))) {
+              peaks <- nrow(metadata(object)$counts)
+              cat(ifelse("bias" %in% names(rowData(counts(object))),
+                  "Bias-corrected ", "Raw "))
+              cat("fragment counts at", peaks, "peaks are available from",
+                  "counts(object).\n")
+            }
           })
