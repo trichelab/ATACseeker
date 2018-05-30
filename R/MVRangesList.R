@@ -164,8 +164,8 @@ setMethod("summarizeVariants",
             hits <- lapply(as.character(ranges(gr)), getRangedImpact)
             rsv <- do.call(rbind, hits[which(sapply(hits, length) > 0)])
             rsv$chrom <- "chrM"
-            rsv$chromStart <- res$Start
-            rsv$chromEnd <- res$Start # FIXME
+            rsv$chromStart <- rsv$Start
+            rsv$chromEnd <- rsv$Start # FIXME
             res <- makeGRangesFromDataFrame(rsv, keep=TRUE)
             seqinfo(res) <- seqinfo(gr)
             return(res)
