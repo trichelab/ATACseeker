@@ -26,7 +26,13 @@ MAlignments <- function(gal, bam) {
 }
 
 
-#' estimated read coverage
+#' MAlignments methods (centralized).
+#'
+#' @name      MAlignments-methods
+NULL
+
+
+#' @rdname    MAlignments-methods
 #' 
 #' @param x   an MAlignments
 #' 
@@ -39,7 +45,7 @@ setMethod("coverage", signature(x="MAlignments"),
           })
 
 
-#' median read length
+#' @rdname    MAlignments-methods
 #' 
 #' @param x   an MAlignments
 #' 
@@ -52,7 +58,7 @@ setMethod("runLength", signature(x="MAlignments"),
           })
 
 
-#' genome size
+#' @rdname    MAlignments-methods
 #' 
 #' @param x   an MAlignments
 #' 
@@ -65,10 +71,7 @@ setMethod("runValue", signature(x="MAlignments"),
           })
 
 
-#' summary of object: reads, readLength, genomeSize, coverage
-#' 
-#' specifically, 
-#' c(length(x), runLength(x), seqlengths(x)[seqlevelsInUse(x)], coverage(x))
+#' @rdname    MAlignments-methods
 #' 
 #' @param x   an MAlignments
 #' 
@@ -84,7 +87,7 @@ setMethod("Summary", signature(x="MAlignments"),
           })
 
 
-#' display alignment records with read coverage estimate
+#' @rdname    MAlignments-methods
 #'
 #' @param x   an MAlignments
 #' 
@@ -98,7 +101,7 @@ setMethod("show", signature(object="MAlignments"),
           })
 
 
-#' fetch the filename for an MAlignments
+#' @rdname    MAlignments-methods
 #'
 #' @param file      an MAlignments
 #' 
@@ -113,7 +116,7 @@ setMethod("fileName", signature(object="MAlignments"),
           })
 
 
-#' fetch the header from an MAlignments' original BAM 
+#' @rdname    MAlignments-methods
 #'
 #' @param bamRanges an MAlignments
 #' 
@@ -126,15 +129,3 @@ setMethod("scanBamHeader", signature(files="MAlignments"),
           function(files) {
             return(scanBamHeader(fileName(files)))
           })
-
-
-#' call variants (shockingly enough) 
-#'
-#' @param x   an MAlignments
-#' 
-#' @return    a VRanges object
-#'
-#' @import    VariantTools
-#'
-#' @export
-setMethod("callVariants", signature(x="MAlignments"), function(x) callMT(x))

@@ -17,8 +17,13 @@ MVRangesList <- function(...) {
   new("MVRangesList", GenomicRangesList(...), elementType = "MVRanges")
 }
 
+#' MVRangesList methods (centralized).
+#'
+#' @name      MVRangesList-methods
+NULL
 
-#' estimated read coverage (recorded from the called MAlignments)
+
+#' @rdname    MVRangesList-methods
 #' 
 #' @param x   an MVRangesList
 #' 
@@ -29,7 +34,7 @@ setMethod("coverage", signature(x="MVRangesList"),
           function(x) sapply(x, coverage))
 
 
-#' load counts
+#' @rdname    MVRangesList-methods
 #' 
 #' @param object  an MVRangesList
 #' @param value   a RangedSummarizedExperiment with identical colnames
@@ -50,23 +55,19 @@ setReplaceMethod("counts",
                  })
 
 
-#' retrieve counts
+#' @rdname    MVRangesList-methods
 #' 
 #' @param object  an MVRangesList
 #' 
-#' @return        counts (a RangedSummarizedExperiment)
-#'
 #' @export
 setMethod("counts", signature(object="MVRangesList"), 
           function(object) metadata(object)$counts)
 
 
-#' compute deviations from expected counts for a list of genotyped specimens 
+#' @rdname    MVRangesList-methods
 #'
 #' @param object        an MVRangesList with an RSE in metadata(object)$counts
 #' @param annotations   RangedSummarizedExperiment with motif matches for object
-#'
-#' @return              a chromVARDeviations object 
 #'
 #' @import chromVAR
 #' 
@@ -83,35 +84,22 @@ setMethod("computeDeviations",
           })
 
 
-#' retrieve deviations
+#' @rdname    MVRangesList-methods
 #' 
 #' @param object  an MVRangesList
 #' 
-#' @return        deviations
-#'
 #' @export
 setMethod("deviations", signature(object="MVRangesList"), 
           function(object) metadata(object)$deviations)
 
 
-#' for sample similarity clustering, add a coercion
-#'
-#' @param from    an MVRangesList
-#' 
-#' @return        deviations
-#'
-#' @import        chromVAR
-#'
-#' @export
 setAs(from="MVRangesList", to="chromVARDeviations", 
       function(from) deviations(from))
 
 
-#' simple helper to retrieve PASS'ing, coding variants from an MVRangesList
+#' @rdname    MVRangesList-methods
 #'
 #' @param x   an MVRangesList
-#'
-#' @return    subsets of MVRangesList elements passing filters in coding regions
 #'
 #' @import    Biostrings
 #'
@@ -120,7 +108,7 @@ setMethod("encoding", signature(x="MVRangesList"),
           function(x) MVRangesList(lapply(x, encoding)))
 
 
-#' display variant calls with overall read coverage estimate
+#' @rdname    MVRangesList-methods
 #'
 #' @param x   an MVRangesList
 #'
