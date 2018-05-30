@@ -6,8 +6,6 @@
 \alias{coverage,MVRangesList-method}
 \alias{counts<-,MVRangesList,RangedSummarizedExperiment-method}
 \alias{counts,MVRangesList-method}
-\alias{computeDeviations,MVRangesList,RangedSummarizedExperiment-method}
-\alias{deviations,MVRangesList-method}
 \alias{encoding,MVRangesList-method}
 \alias{show,MVRangesList-method}
 \title{MVRangesList methods (centralized).}
@@ -18,37 +16,23 @@
 
 \S4method{counts}{MVRangesList}(object)
 
-\S4method{computeDeviations}{MVRangesList,RangedSummarizedExperiment}(object,
-  annotations)
-
-\S4method{deviations}{MVRangesList}(object)
-
 \S4method{encoding}{MVRangesList}(x)
 
 \S4method{show}{MVRangesList}(object)
 }
 \arguments{
-\item{x}{an MVRangesList}
+\item{x}{an MVRangesList (for some methods)}
 
-\item{object}{an MVRangesList}
+\item{object}{an MVRangesList (for other methods)}
 
-\item{value}{a RangedSummarizedExperiment with identical colnames}
+\item{value}{a RangedSummarizedExperiment with matching colnames}
 
-\item{annotations}{RangedSummarizedExperiment with motif matches for object}
-
-\item{object}{an MVRangesList}
-
-\item{object}{an MVRangesList with an RSE in metadata(object)$counts}
-
-\item{object}{an MVRangesList}
-
-\item{x}{an MVRangesList}
-
-\item{x}{an MVRangesList}
-}
-\value{
-estimated coverage from the called MAlignments[List]
+\item{annotations}{a RangedSummarizedExperiment with motif matches}
 }
 \description{
-MVRangesList methods (centralized).
+`counts`     returns fragment counts, if any, as a SummarizedExperiment.
+`counts<-`   adds or updates fragment counts from a SummarizedExperiment.
+`coverage`   returns the estimated coverage for each element in the list.
+`deviations` returns deviations computed and stored from computeDeviations.
+`encoding`   returns a subset of mutations in coding regions of mtDNA genes.
 }

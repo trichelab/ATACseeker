@@ -1,6 +1,9 @@
 #' like a VRangesList, but for mitochondria
 #' 
 #' @import VariantAnnotation
+#' @import Biostrings
+#' @import S4Vectors
+#' @import chromVAR
 #' 
 #' @exportClass MVRangesList
 setClass("MVRangesList", contains="SimpleVRangesList")
@@ -20,26 +23,28 @@ MVRangesList <- function(...) {
 
 #' MVRangesList methods (centralized).
 #'
-#' @name      MVRangesList-methods
+#' `counts`     returns fragment counts, if any, as a SummarizedExperiment.
+#' `counts<-`   adds or updates fragment counts from a SummarizedExperiment.
+#' `coverage`   returns the estimated coverage for each element in the list.
+#' `deviations` returns deviations computed and stored from computeDeviations.
+#' `encoding`   returns a subset of mutations in coding regions of mtDNA genes.
+#' 
+#' @param x            an MVRangesList (for some methods)
+#' @param object       an MVRangesList (for other methods)
+#' @param annotations  a RangedSummarizedExperiment with motif matches
+#' @param value        a RangedSummarizedExperiment with matching colnames
+#'
+#' @name  MVRangesList-methods
 NULL
 
 
 #' @rdname    MVRangesList-methods
-#' 
-#' @param x   an MVRangesList
-#' 
-#' @return    estimated coverage from the called MAlignments[List]
-#'
 #' @export
 setMethod("coverage", signature(x="MVRangesList"), 
           function(x) sapply(x, coverage))
 
 
 #' @rdname    MVRangesList-methods
-#' 
-#' @param object  an MVRangesList
-#' @param value   a RangedSummarizedExperiment with identical colnames
-#' 
 #' @export
 setReplaceMethod("counts", 
                  signature(object="MVRangesList", 
@@ -49,72 +54,27 @@ setReplaceMethod("counts",
                      stop("Error: colnames(value) doesn't match names(object)!")
                    } else if (!"counts" %in% names(assays(value))) {
                      stop("Error: value must have an assay named `counts`!")
-                   } else { 
-                     metadata(object)$counts <- value[, names(object)]
+                   } else {
+                     columns <- names(object)
+                     metadata(object)$counts <- filterPeaks(value[, columns])
                      return(object)
                    }
                  })
 
 
 #' @rdname    MVRangesList-methods
-#' 
-#' @param object  an MVRangesList
-#' 
 #' @export
 setMethod("counts", signature(object="MVRangesList"), 
           function(object) metadata(object)$counts)
 
 
 #' @rdname    MVRangesList-methods
-#'
-#' @param object        an MVRangesList with an RSE in metadata(object)$counts
-#' @param annotations   RangedSummarizedExperiment with motif matches for object
-#'
-#' @import chromVAR
-#' 
-#' @export
-setMethod("computeDeviations", 
-          signature(object="MVRangesList", 
-                    annotations="RangedSummarizedExperiment"),
-          function(object, annotations) { 
-            if (!"counts" %in% names(metadata(object))) {
-              stop("Error: metadata(object)$counts is currently empty.")
-            } else {
-              computeDeviations(object=counts(object), annotations=annotations)
-            }
-          })
-
-
-#' @rdname    MVRangesList-methods
-#' 
-#' @param object  an MVRangesList
-#' 
-#' @export
-setMethod("deviations", signature(object="MVRangesList"), 
-          function(object) metadata(object)$deviations)
-
-
-setAs(from="MVRangesList", to="chromVARDeviations", 
-      function(from) deviations(from))
-
-
-#' @rdname    MVRangesList-methods
-#'
-#' @param x   an MVRangesList
-#'
-#' @import    Biostrings
-#'
 #' @export
 setMethod("encoding", signature(x="MVRangesList"), 
           function(x) MVRangesList(lapply(x, encoding)))
 
 
 #' @rdname    MVRangesList-methods
-#'
-#' @param x   an MVRangesList
-#'
-#' @import S4Vectors
-#' 
 #' @export
 setMethod("show", signature(object="MVRangesList"),
           function(object) {
