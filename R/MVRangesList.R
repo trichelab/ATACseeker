@@ -148,11 +148,16 @@ setMethod("summarizeVariants",
               if (nrow(res) > 0) {
                 res$genomic <- with(res, paste0("g.", Start, Ref, ">", Alt))
                 res$protein <- with(res, paste0("p.",AA_ref,AA_position,AA_alt))
-                res$change <- with(res, paste(Gene_symbol, protein))
-                res[, c("genomic","protein","APOGEE_boost_consensus",
-                        "MtoolBox","Mitomap_Phenotype","Mitomap_Status",
-                        "OXPHOS_complex","dbSNP_150_id","Codon_substitution",
-                        "Start","Ref","Alt","Gene_symbol","change")]
+                res$Consequence <- with(res, 
+                                        paste(Gene_symbol, 
+                                              paste0(AA_ref,
+                                                     AA_position,
+                                                     AA_alt)))
+                res[, c("genomic","protein","Start",
+                        "Ref","Alt","Codon_substitution","dbSNP_150_id",
+                        "Mitomap_Phenotype","Mitomap_Status",
+                        "Gene_symbol","OXPHOS_complex",
+                        "Consequence","APOGEE_boost_consensus","MtoolBox")]
               } else {
                 return(NULL)
               }
@@ -163,9 +168,9 @@ setMethod("summarizeVariants",
             message("Retrieving functional annotations for variants...")
             hits <- lapply(as.character(ranges(gr)), getRangedImpact)
             rsv <- do.call(rbind, hits[which(sapply(hits, length) > 0)])
+            names(rsv) <- sub("Start", "start", names(rsv)) # grrr
             rsv$chrom <- "chrM"
-            rsv$chromStart <- rsv$Start
-            rsv$chromEnd <- rsv$Start # FIXME
+            rsv$end <- rsv$start # FIXME
             res <- makeGRangesFromDataFrame(rsv, keep=TRUE)
             seqinfo(res) <- seqinfo(gr)
             return(res)
