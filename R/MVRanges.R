@@ -20,37 +20,36 @@ MVRanges <- function(vr, coverage) new("MVRanges", vr, coverage=coverage)
 
 #' MVRanges methods (centralized).
 #'
-#' @name      MVRanges-methods
+#' `pos` returns a character vector describing variant positions 
+#' `type` returns a character vector describing variant type (SNV or indel)
+#' `coverage` returns the estimated average mitochondrial read coverage depth
+#' `annotation` returns (perhaps oddly) an annotated, lifted MVRanges object
+#' `getAnnotations` returns the GRanges of gene/region annotations for an MVR
+#' `encoding` returns variants residing in coding regions (consequence unknown)
+#' `predictCoding` returns variants consequence predictions as one might expect
+#' `summarizeVariants` uses MitImpact to attempt annotation of coding variants.
+#'
+#' @param x             an MVRanges
+#' @param object        an MVRanges
+#' @param annotations   an MVRanges
+#' @param query         an MVRanges
+#'
+#' @name                MVRanges-methods
 NULL
 
 
 #' @rdname    MVRanges-methods
-#' 
-#' @param x   an MVRanges
-#' 
-#' @return    estimated coverage (numeric) from the called MAlignments
-#'
 #' @export
 setMethod("coverage", signature(x="MVRanges"), function(x) x@coverage)
 
 
 #' @rdname    MVRanges-methods
-#' 
-#' @param x   an MVRanges
-#' 
-#' @return    a vector of variant types ("SNV" or "indel")
-#'
 #' @export
 setMethod("type", signature(x="MVRanges"), 
           function(x) ifelse(width(x) == 1, "SNV", "indel"))
 
 
 #' @rdname    MVRanges-methods
-#' 
-#' @param x   an MVRanges
-#' 
-#' @return    a named CHARACTER vector of variant positions for MitImpact/HGVS
-#'
 #' @export
 setMethod("pos", signature(x="MVRanges"), 
           function(x) {
@@ -61,9 +60,6 @@ setMethod("pos", signature(x="MVRanges"),
 
 
 #' @rdname    MVRanges-methods
-#'
-#' @param x   an MVRanges
-#' 
 #' @export
 setMethod("show", signature(object="MVRanges"),
           function(object) {
@@ -78,9 +74,6 @@ setMethod("show", signature(object="MVRanges"),
 
 
 #' @rdname    MVRanges-methods
-#' 
-#' @param object  an MVRanges
-#'
 #' @export
 setMethod("annotation", signature(object="MVRanges"), 
           function(object) {
@@ -106,9 +99,6 @@ setMethod("annotation", signature(object="MVRanges"),
 
 
 #' @rdname    MVRanges-methods
-#'
-#' @param annotations   an MVRanges
-#'
 #' @export
 setMethod("getAnnotations", signature(annotations="MVRanges"), 
           function(annotations) {
@@ -121,11 +111,6 @@ setMethod("getAnnotations", signature(annotations="MVRanges"),
 
 
 #' @rdname    MVRanges-methods
-#'
-#' @param x   an MVRanges
-#'
-#' @import    Biostrings
-#'
 #' @export
 setMethod("encoding", signature(x="MVRanges"), 
           function(x) {
@@ -146,11 +131,6 @@ setMethod("encoding", signature(x="MVRanges"),
 
 
 #' @rdname    MVRanges-methods
-#'
-#' @param  query  an MVRanges
-#'
-#' @import        Biostrings
-#'
 #' @export
 setMethod("predictCoding", # mitochondrial annotations kept internally
           signature(query="MVRanges", "missing", "missing", "missing"), 
@@ -175,15 +155,11 @@ setMethod("predictCoding", # mitochondrial annotations kept internally
 
 
 #' @rdname    MVRanges-methods
-#'
-#' @param query   an MVRanges, almost always after predictCoding(MVRanges)
-#'
-#' @import        jsonlite
-#'
 #' @export
 setMethod("summarizeVariants", signature(query="MVRanges","missing","missing"),
           function(query, ...) {
-           
+          
+            # helper function  
             getImpact <- function(pos) {
               url <- paste("http://mitimpact.css-mendel.it", "api", "v2.0",
                            "genomic_position", sub("^g\\.", "", pos), sep="/")

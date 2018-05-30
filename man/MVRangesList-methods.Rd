@@ -8,6 +8,8 @@
 \alias{counts,MVRangesList-method}
 \alias{encoding,MVRangesList-method}
 \alias{show,MVRangesList-method}
+\alias{granges,MVRangesList-method}
+\alias{summarizeVariants,MVRangesList,missing,missing-method}
 \title{MVRangesList methods (centralized).}
 \usage{
 \S4method{coverage}{MVRangesList}(x)
@@ -19,6 +21,11 @@
 \S4method{encoding}{MVRangesList}(x)
 
 \S4method{show}{MVRangesList}(object)
+
+\S4method{granges}{MVRangesList}(x, filterLowQual = TRUE)
+
+\S4method{summarizeVariants}{MVRangesList,missing,missing}(query, subject, mode,
+  ...)
 }
 \arguments{
 \item{x}{an MVRangesList (for some methods)}
@@ -27,12 +34,15 @@
 
 \item{value}{a RangedSummarizedExperiment with matching colnames}
 
-\item{annotations}{a RangedSummarizedExperiment with motif matches}
+\item{filterLowQual}{optional argument to `granges` and `summarizeVariants`}
+
+\item{annotations}{a RangedSummarizedExperiment with motif count matches}
 }
 \description{
-`counts`     returns fragment counts, if any, as a SummarizedExperiment.
-`counts<-`   adds or updates fragment counts from a SummarizedExperiment.
-`coverage`   returns the estimated coverage for each element in the list.
-`deviations` returns deviations computed and stored from computeDeviations.
-`encoding`   returns a subset of mutations in coding regions of mtDNA genes.
+`counts`               returns fragment counts, if any
+`counts<-`             adds or updates fragment counts
+`coverage`             returns estimated coverage for each element
+`encoding`             returns mutations in coding regions for each element
+`granges`              returns mildly annotated aggregates of variant sites
+`summarizeVariants`    attempts mass functional annotation of variant sites
 }

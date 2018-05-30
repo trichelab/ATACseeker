@@ -42,24 +42,14 @@
 \item{annotations}{an MVRanges}
 
 \item{query}{an MVRanges}
-
-\item{x}{an MVRanges}
-
-\item{x}{an MVRanges}
-
-\item{x}{an MVRanges}
-
-\item{x}{an MVRanges}
-
-\item{query}{an MVRanges, almost always after predictCoding(MVRanges)}
-}
-\value{
-estimated coverage (numeric) from the called MAlignments
-
-a vector of variant types ("SNV" or "indel")
-
-a named CHARACTER vector of variant positions for MitImpact/HGVS
 }
 \description{
-MVRanges methods (centralized).
+`pos` returns a character vector describing variant positions 
+`type` returns a character vector describing variant type (SNV or indel)
+`coverage` returns the estimated average mitochondrial read coverage depth
+`annotation` returns (perhaps oddly) an annotated, lifted MVRanges object
+`getAnnotations` returns the GRanges of gene/region annotations for an MVR
+`encoding` returns variants residing in coding regions (consequence unknown)
+`predictCoding` returns variants consequence predictions as one might expect
+`summarizeVariants` uses MitImpact to attempt annotation of coding variants.
 }

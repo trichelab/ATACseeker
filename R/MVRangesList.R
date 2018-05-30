@@ -23,16 +23,18 @@ MVRangesList <- function(...) {
 
 #' MVRangesList methods (centralized).
 #'
-#' `counts`     returns fragment counts, if any, as a SummarizedExperiment.
-#' `counts<-`   adds or updates fragment counts from a SummarizedExperiment.
-#' `coverage`   returns the estimated coverage for each element in the list.
-#' `deviations` returns deviations computed and stored from computeDeviations.
-#' `encoding`   returns a subset of mutations in coding regions of mtDNA genes.
+#' `counts`               returns fragment counts, if any
+#' `counts<-`             adds or updates fragment counts
+#' `coverage`             returns estimated coverage for each element
+#' `encoding`             returns mutations in coding regions for each element
+#' `granges`              returns mildly annotated aggregates of variant sites
+#' `summarizeVariants`    attempts mass functional annotation of variant sites
 #' 
-#' @param x            an MVRangesList (for some methods)
-#' @param object       an MVRangesList (for other methods)
-#' @param annotations  a RangedSummarizedExperiment with motif matches
-#' @param value        a RangedSummarizedExperiment with matching colnames
+#' @param x             an MVRangesList (for some methods)
+#' @param object        an MVRangesList (for other methods)
+#' @param value         a RangedSummarizedExperiment with matching colnames
+#' @param annotations   a RangedSummarizedExperiment with motif count matches
+#' @param filterLowQual optional argument to `granges` and `summarizeVariants`
 #'
 #' @name  MVRangesList-methods
 NULL
@@ -65,7 +67,8 @@ setReplaceMethod("counts",
 #' @rdname    MVRangesList-methods
 #' @export
 setMethod("counts", signature(object="MVRangesList"), 
-          function(object) metadata(object)$counts)
+          # it turns out that filtering may be needed on egress:
+          function(object) filterPeaks(metadata(object)$counts))
 
 
 #' @rdname    MVRangesList-methods
@@ -89,3 +92,76 @@ setMethod("show", signature(object="MVRangesList"),
                   "counts(object).\n")
             }
           })
+
+
+#' @rdname    MVRangesList-methods
+#' @export
+setMethod("granges", signature(x="MVRangesList"),
+          function(x, filterLowQual=TRUE) {
+            data(hg19TorCRS)
+            data(chrominfo.rCRS)
+            # pull in annotations
+            anno <- suppressMessages(getAnnotations(annotation(x[[1]]))) 
+            if (filterLowQual == TRUE) {
+              message("Filtering out low-quality calls...")
+              x <- MVRangesList(sapply(x, subset, PASS))
+            }
+            message("Aggregating variants...")
+            gr <- unlist(GRangesList(sapply(x, granges)))
+            seqlevelsStyle(gr) <- "UCSC" # chrM
+            mtGenome <- unique(genome(gr))
+            if (mtGenome %in% c("rCRS","GRCh38","hg38")) {
+              seqinfo(gr) <- chrominfo.rCRS # identical save for name 
+            } else if (mtGenome == "hg19") {
+              message("Lifting variants to rCRS...")
+              gr <- sort(unlist(liftOver(gr, hg19TorCRS)))
+              seqinfo(gr) <- chrominfo.rCRS # as with TxDB
+            } else if (mtGenome != "rCRS") { 
+              stop("Unsupported genome: ", mtGenome)
+            }
+            gr <- reduce(gr)
+            annoGenome <- unique(genome(anno))
+            newMtGenome <- unique(genome(gr))
+            stopifnot(newMtGenome == annoGenome)
+            metadata(gr)$annotation <- anno
+            ol <- findOverlaps(gr, anno)
+            message("Annotating variants by region...")
+            gr$gene <- NA_character_
+            gr[queryHits(ol)]$gene <- names(anno)[subjectHits(ol)] 
+            gr$region <- NA_character_
+            gr[queryHits(ol)]$region <- anno[subjectHits(ol)]$region
+            return(gr)
+          })
+
+
+#' @rdname    MVRangesList-methods
+#' @export
+setMethod("summarizeVariants", 
+          signature(query="MVRangesList","missing","missing"),
+          function(query, ...) {
+            
+            # code duplication! refactor
+            getRangedImpact <- function(pos) {
+              url <- paste("http://mitimpact.css-mendel.it", "api", "v2.0",
+                           "genomic_position", pos, sep="/")
+              res <- as.data.frame(read_json(url, simplifyVector=TRUE)$variants)
+              if (nrow(res) > 0) {
+                res$genomic <- with(res, paste0("g.", Start, Ref, ">", Alt))
+                res$protein <- with(res, paste0("p.",AA_ref,AA_position,AA_alt))
+                res$change <- with(res, paste(Gene_symbol, protein))
+                res[, c("genomic","protein","APOGEE_boost_consensus","MtoolBox",
+                        "Mitomap_Phenotype","Mitomap_Status","OXPHOS_complex",
+                        "dbSNP_150_id","Codon_substitution")]
+              } else {
+                return(NULL)
+              }
+            }
+
+            gr <- granges(query, ...)
+            names(gr) <- as.character(gr)
+            message("Retrieving functional annotations for variants...")
+            hits <- lapply(as.character(ranges(gr)), getRangedImpact)
+            do.call(rbind, hits[which(sapply(hits, length) > 0)])
+
+          })
+
