@@ -17,6 +17,7 @@ MVRangesList <- function(...) {
   new("MVRangesList", GenomicRangesList(...), elementType = "MVRanges")
 }
 
+
 #' MVRangesList methods (centralized).
 #'
 #' @name      MVRangesList-methods

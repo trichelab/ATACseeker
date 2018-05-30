@@ -16,8 +16,10 @@ Depends:
     csaw
 Imports:
     gmapR,
+    jsonlite,
     chromVAR,
     Rsamtools,
+    Biostrings,
     motifmatchr,
     GenomicRanges,
     GenomicAlignments
