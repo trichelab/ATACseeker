@@ -22,11 +22,13 @@ MVRanges <- function(vr, coverage) new("MVRanges", vr, coverage=coverage)
 #'
 #' `pos` returns a character vector describing variant positions 
 #' `type` returns a character vector describing variant type (SNV or indel)
+#' `filt` returns a subset of variant calls where PASS == TRUE (i.e. filtered)
 #' `coverage` returns the estimated average mitochondrial read coverage depth
 #' `annotation` returns (perhaps oddly) an annotated, lifted MVRanges object
 #' `getAnnotations` returns the GRanges of gene/region annotations for an MVR
 #' `encoding` returns variants residing in coding regions (consequence unknown)
 #' `predictCoding` returns variants consequence predictions as one might expect
+#' `tallyVariants` returns a named vector of variant types by annotated region.
 #' `summarizeVariants` uses MitImpact to attempt annotation of coding variants.
 #'
 #' @param x             an MVRanges
@@ -64,7 +66,7 @@ setMethod("pos", signature(x="MVRanges"),
 setMethod("show", signature(object="MVRanges"),
           function(object) {
             callNextMethod()
-            cat(paste0("  genome: ", unique(genome(object))))
+            cat(paste0("  genome: ", genome(object)))
             if ("annotation" %in% names(metadata(object))) {
               cat(" (try getAnnotations(object))")
             }
@@ -126,6 +128,60 @@ setMethod("encoding", signature(x="MVRanges"),
             
             # return subset
             return(x[keep])
+
+          })
+
+
+#' @rdname    MVRanges-methods
+#' @export
+setMethod("filt", signature(x="MVRanges"), function(x) subset(x,x$PASS == TRUE))
+
+
+#' @rdname    MVRanges-methods
+#' @export
+setMethod("genome", signature(x="MVRanges"), 
+          function(x) unique(seqinfo(x)@genome))
+
+
+#' @rdname    MVRanges-methods
+#' @export
+setMethod("locateVariants", 
+          signature(query="MVRanges","missing","missing"),
+          function(query, filterLowQual=TRUE, ...) {
+
+            if (filterLowQual == TRUE) query <- filt(query)
+            if ("gene" %in% names(mcols(query)) &
+                "region" %in% names(mcols(query))) return(query) # done 
+
+            # otherwise, annotate:
+            isCircular(query)["chrM"] <- TRUE # grrr
+            whichGenes <- paste0("mtGenes.", genome(query))
+            avail <- data(package="ATACseeker")$results[,"Item"]
+            availableMtGenes <- grep("^mtGenes\\.", value=TRUE, avail)
+            if (!whichGenes %in% availableMtGenes) {
+              stop("No quick gene location database for ", whichGenes)
+            } else { 
+              data(list=whichGenes, package="ATACseeker")
+              anno <- get(whichGenes)
+            }
+
+            ol <- findOverlaps(query, anno, ignore.strand=TRUE)
+            query$gene <- NA_character_
+            query[queryHits(ol)]$gene <- names(anno)[subjectHits(ol)] 
+            query$region <- NA_character_
+            query[queryHits(ol)]$region <- anno[subjectHits(ol)]$region
+            return(query)
+
+          })
+
+
+#' @rdname    MVRanges-methods
+#' @export
+setMethod("tallyVariants", signature(x="MVRanges"), 
+          function(x, filterLowQual=TRUE, ...) {
+
+            located <- locateVariants(x, filterLowQual=filterLowQual)
+            table(located$region)
 
           })
 

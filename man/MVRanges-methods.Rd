@@ -10,6 +10,10 @@
 \alias{annotation,MVRanges-method}
 \alias{getAnnotations,MVRanges-method}
 \alias{encoding,MVRanges-method}
+\alias{filt,MVRanges-method}
+\alias{genome,MVRanges-method}
+\alias{locateVariants,MVRanges,missing,missing-method}
+\alias{tallyVariants,MVRanges-method}
 \alias{predictCoding,MVRanges,missing,missing,missing-method}
 \alias{summarizeVariants,MVRanges,missing,missing-method}
 \title{MVRanges methods (centralized).}
@@ -27,6 +31,15 @@
 \S4method{getAnnotations}{MVRanges}(annotations)
 
 \S4method{encoding}{MVRanges}(x)
+
+\S4method{filt}{MVRanges}(x)
+
+\S4method{genome}{MVRanges}(x)
+
+\S4method{locateVariants}{MVRanges,missing,missing}(query,
+  filterLowQual = TRUE, ...)
+
+\S4method{tallyVariants}{MVRanges}(x, filterLowQual = TRUE, ...)
 
 \S4method{predictCoding}{MVRanges,missing,missing,missing}(query, subject,
   seqSource, varAllele, ...)
@@ -46,10 +59,12 @@
 \description{
 `pos` returns a character vector describing variant positions 
 `type` returns a character vector describing variant type (SNV or indel)
+`filt` returns a subset of variant calls where PASS == TRUE (i.e. filtered)
 `coverage` returns the estimated average mitochondrial read coverage depth
 `annotation` returns (perhaps oddly) an annotated, lifted MVRanges object
 `getAnnotations` returns the GRanges of gene/region annotations for an MVR
 `encoding` returns variants residing in coding regions (consequence unknown)
 `predictCoding` returns variants consequence predictions as one might expect
+`tallyVariants` returns a named vector of variant types by annotated region.
 `summarizeVariants` uses MitImpact to attempt annotation of coding variants.
 }

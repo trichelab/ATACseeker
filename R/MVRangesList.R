@@ -1,6 +1,7 @@
 #' like a VRangesList, but for mitochondria
 #' 
 #' @import VariantAnnotation
+#' @import VariantTools
 #' @import Biostrings
 #' @import S4Vectors
 #' @import chromVAR
@@ -26,15 +27,19 @@ MVRangesList <- function(...) {
 #' `counts`               returns fragment counts, if any
 #' `counts<-`             adds or updates fragment counts
 #' `coverage`             returns estimated coverage for each element
+#' `genome`               returns the genome (or, perhaps, genomes) in an MVRL
+#' `filt`                 removes variants where PASS != TRUE for each element 
 #' `encoding`             returns mutations in coding regions for each element
 #' `granges`              returns mildly annotated aggregates of variant sites
+#' `tallyVariants`        return a matrix of variant types by annotated region
+#' `locateVariants`       locates variants within genes, tRNA, rRNA, or D-loop
 #' `summarizeVariants`    attempts mass functional annotation of variant sites
 #' 
 #' @param x             an MVRangesList (for some methods)
 #' @param object        an MVRangesList (for other methods)
 #' @param value         a RangedSummarizedExperiment with matching colnames
 #' @param annotations   a RangedSummarizedExperiment with motif count matches
-#' @param filterLowQual optional argument to `granges` and `summarizeVariants`
+#' @param filterLowQual opt. for `granges`/`summarizeVariants`/`tallyVariants`
 #'
 #' @name  MVRangesList-methods
 NULL
@@ -94,6 +99,20 @@ setMethod("show", signature(object="MVRangesList"),
           })
 
 
+# helper
+setAs(from="MVRangesList", to="GRangesList",
+      function(from) GRangesList(lapply(from, granges)))
+
+
+#' @rdname    MVRangesList-methods
+#' @export
+setMethod("filt", signature(x="MVRangesList"),
+          function(x) {
+            message("Filtering out low-quality calls...")
+            MVRangesList(sapply(x, subset, PASS))
+          })
+
+
 #' @rdname    MVRangesList-methods
 #' @export
 setMethod("granges", signature(x="MVRangesList"),
@@ -102,12 +121,9 @@ setMethod("granges", signature(x="MVRangesList"),
             data(chrominfo.rCRS)
             # pull in annotations
             anno <- suppressMessages(getAnnotations(annotation(x[[1]]))) 
-            if (filterLowQual == TRUE) {
-              message("Filtering out low-quality calls...")
-              x <- MVRangesList(sapply(x, subset, PASS))
-            }
+            if (filterLowQual == TRUE) x <- filt(x) 
             message("Aggregating variants...")
-            gr <- unlist(GRangesList(sapply(x, granges)))
+            gr <- unlist(as(x, "GRangesList"))
             seqlevelsStyle(gr) <- "UCSC" # chrM
             mtGenome <- unique(genome(gr))
             if (mtGenome %in% c("rCRS","GRCh38","hg38")) {
@@ -138,7 +154,7 @@ setMethod("granges", signature(x="MVRangesList"),
 #' @export
 setMethod("summarizeVariants", 
           signature(query="MVRangesList","missing","missing"),
-          function(query, ...) {
+          function(query, filterLowQual=TRUE, ...) {
             
             # code duplication! refactor
             getRangedImpact <- function(pos) {
@@ -163,7 +179,7 @@ setMethod("summarizeVariants",
               }
             }
 
-            gr <- granges(query, ...)
+            gr <- granges(query, filterLowQual=filterLowQual, ...)
             names(gr) <- as.character(gr)
             message("Retrieving functional annotations for variants...")
             hits <- lapply(as.character(ranges(gr)), getRangedImpact)
@@ -177,3 +193,26 @@ setMethod("summarizeVariants",
 
           })
 
+
+#' @rdname    MVRangesList-methods
+#' @export
+setMethod("genome", signature(x="MVRangesList"),
+          function(x) unique(sapply(lapply(x, genome), unique)))
+
+
+#' @rdname    MVRangesList-methods
+#' @export
+setMethod("locateVariants", 
+          signature(query="MVRangesList","missing","missing"),
+          function(query, filterLowQual=TRUE, ...) {
+
+            if (filterLowQual == TRUE) query <- filt(query)
+            MVRangesList(lapply(query, locateVariants))
+
+          })
+
+
+#' @rdname    MVRangesList-methods
+#' @export
+setMethod("tallyVariants", signature(x="MVRangesList"),
+          function(x, filterLowQual=TRUE, ...) sapply(x, tallyVariants))
