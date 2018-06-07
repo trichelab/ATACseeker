@@ -22,7 +22,13 @@ MAlignmentsList <- function(...) {
 }
 
 
-#' cache summary stats and perform any necessary updates for an MAlignmentsList
+#' MAlignmentsList methods (centralized).
+#'
+#' @name      MAlignmentsList-methods
+NULL
+
+
+#' @rdname          MAlignmentsList-methods
 #' 
 #' @param object    an MAlignmentsList, usually lacking some cached information
 #'
@@ -45,9 +51,7 @@ setMethod("updateObject", signature(object="MAlignmentsList"),
           }) 
 
 
-#' estimated read coverage for each element (cached on load)
-#' 
-#' (co-opting a generic from `IRanges`)
+#' @rdname          MAlignmentsList-methods
 #'
 #' @param x   an MAlignmentsList
 #' 
@@ -60,9 +64,7 @@ setMethod("coverage", signature(x="MAlignmentsList"),
           function(x) Summary(x)[, "genomeCoverage"])
 
 
-#' estimated read length for each element (cached on load)
-#' 
-#' (co-opting a generic from `S4Vectors`)
+#' @rdname          MAlignmentsList-methods
 #'
 #' @param x   an MAlignmentsList
 #' 
@@ -75,7 +77,7 @@ setMethod("runLength", signature(x="MAlignmentsList"),
           function(x) sapply(x, runLength))
 
 
-#' list the BAM filenames for the elements of an MAlignmentsList
+#' @rdname          MAlignmentsList-methods
 #' 
 #' @param object  an MAlignmentsList
 #' 
@@ -100,9 +102,7 @@ setMethod("fileName", signature(object="MAlignmentsList"),
           })
 
 
-#' summary of an MAlignmentsList
-#'
-#' (generic defined in base, no less)
+#' @rdname          MAlignmentsList-methods
 #' 
 #' @param x    an MAlignmentsList
 #' 
@@ -127,7 +127,7 @@ setMethod("Summary", signature(x="MAlignmentsList"),
           })
 
 
-#' display alignment collections with element summaries
+#' @rdname          MAlignmentsList-methods
 #'
 #' @param objects   an MAlignmentsList
 #' 
@@ -141,15 +141,3 @@ setMethod("show", signature(object="MAlignmentsList"),
             cat("-------\n", sep = "")
             cat("seqinfo: ", summary(seqinfo(object)), "\n", sep = "")
           })
-
-
-#' call variants (shockingly enough) 
-#'
-#' @param x   an MAlignmentsList
-#' 
-#' @return    a MVRangesList object
-#'
-#' @import    VariantTools
-#'
-#' @export
-setMethod("callVariants", signature(x="MAlignmentsList"), function(x) callMT(x))

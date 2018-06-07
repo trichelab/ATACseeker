@@ -1,24 +1,34 @@
 Package: ATACseeker
 Type: Package
 Title: Utilities for ATACseq QC, differential accessibility, and integration
-Version: 0.9.45
-Date: 2018-05-23
+Version: 0.9.52
+Date: 2018-05-31
 Author: Tim Triche, Jr., Asif Zubair, Ben Johnson
 Maintainer: Tim Triche, Jr. <tim.triche@gmail.com>
-Description: Some ATACseq tools with marginal documentation
+Description: Some ATACseq tools
 Depends:
     Homo.sapiens,
     VariantAnnotation,
     VariantTools,
     rtracklayer,
+    jsonlite,
+    pheatmap,
     ggthemes,
-    chromVAR,
+    ggplot2, 
     preseqR,
-    gmapR,
     csaw
 Imports:
+    gmapR,
+    IRanges,
+    jsonlite,
+    chromVAR,
     Rsamtools,
+    Repitools, 
+    S4Vectors,
+    Biostrings,
+    motifmatchr,
     GenomicRanges,
-    GenomicAlignments
+    GenomicAlignments,
+    SummarizedExperiment
 License: Artistic
 RoxygenNote: 6.0.1
