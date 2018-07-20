@@ -1,10 +1,10 @@
-#' Calculate Pearson correlations of a binned matrix
+#' Calculate Pearson correlations of smoothed eigenvectors
 #' 
 #' This function is used to generate a list x to be passed to getABSignal
 #'
 #' @param x      A list object from getCorMatrix
-#' @param k    A value of k for smoothing
-#' @param iter    Number of iterations for moving average smoothing
+#' @param k    Bin size for smoothing (default = 2)
+#' @param iter    Number of iterations for moving average smoothing (default = 2)
 #' 
 #' @return    A list x to pass to getABSignal
 #' 
@@ -14,8 +14,11 @@
 #' @export 
 
 getABSignal <- function(x, k = 2, iter = 2){
+  message("Calculating eigenvectors...\n")
   pc <- .getFirstPC(x$binmat.cor)
+  message(paste0("Smoothing with a bin size of ", k, " and ", iter, " iterations...\n"))
   pc <- .meanSmoother(pc, k=k, iter=iter)
+  message("Done smoothing...\n")
   return(list(pc=pc, gr=x$gr))
 }
 

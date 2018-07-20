@@ -10,7 +10,7 @@
 #' @param chr.start    Starting position (in bp) to be analyzed
 #' @param chr.end    End position (in bp) to be analyzed
 #' @param res    Binning resolution (in bp)
-#' @param FUN    Function to be used to summarize inforxion within a bin
+#' @param FUN    Function to be used to summarize information within a bin
 #' 
 #' @return    A list object to pass to getCorMatrix
 #' 
