@@ -12,9 +12,9 @@
 
 getCorMatrix <- function(binmat) {
   #Calculate correlations
-  message("Calculating correlations...\n")
+  message("Calculating correlations...")
   binmat.cor <- cor(t(binmat$x))
   gr.cor  <- binmat$gr
-  message("Done...\n")
+  message("Done...")
   return(list(gr.cor=gr.cor, binmat.cor=binmat.cor))
 }

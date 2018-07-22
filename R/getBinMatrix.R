@@ -15,18 +15,22 @@
 #' @return    A list object to pass to getCorMatrix
 #' 
 #' @import    GRanges
+#' @import    Homo.sapiens
 #' 
 #' @export 
 
-getBinMatrix <- function(x, genloc, chr = "chr1", chr.start = 0, chr.end, res = 100000, FUN=sum){
+getBinMatrix <- function(x, genloc, chr = "chr1", chr.start = 0, chr.end = NULL, res = 100000, FUN=sum){
   
   if (any(is.na(x))){
-    stop("Matrix must not contain NAs. ")
+    stop("Matrix must not contain NAs")
   }
   if (nrow(x)!=length(genloc)){
     stop("Provided granges must have length equal to the matrix number of rows")
   }
   
+  if (is.null(chr.end)) {
+    chr.end <- seqlengths(Homo.sapiens)[chr]
+  }
   start <- seq(chr.start, chr.end, res) #Build the possible bin ranges given resolution
   end <- c(start[-1], chr.end) - 1L #If no end specified, set to -1 to get full chromosome
   
@@ -39,7 +43,7 @@ getBinMatrix <- function(x, genloc, chr = "chr1", chr.start = 0, chr.end, res = 
   
   #Get the number of bins overlapping loci
   n <- length(gr.bin)
-  message(paste0(n, " bins are created. \n"))
+  message(paste0(n, " bins are created..."))
   
   #User defined function to summarize data in the bins
   #TODO: allow for bin matrices to be generated for all chrs

@@ -14,11 +14,11 @@
 #' @export 
 
 getABSignal <- function(x, k = 2, iter = 2){
-  message("Calculating eigenvectors...\n")
+  message("Calculating eigenvectors...")
   pc <- .getFirstPC(x$binmat.cor)
-  message(paste0("Smoothing with a bin size of ", k, " and ", iter, " iterations...\n"))
+  message(paste0("Smoothing with a bin size of ", k, " and ", iter, " iterations..."))
   pc <- .meanSmoother(pc, k=k, iter=iter)
-  message("Done smoothing...\n")
+  message("Done smoothing...")
   return(list(pc=pc, gr=x$gr))
 }
 

@@ -16,11 +16,11 @@
 #' @export 
 
 estK <- function(dat, mod, method = "leek", vfilter = NULL, B = 20, seed = 777) {
-  message("Estimating a value of k using surrogate variable analysis...\n")
+  message("Estimating a value of k using surrogate variable analysis...")
   k <- sva::num.sv(dat = dat, mod = mod, method = method, vfilter = vfilter, B = B, seed = seed)
   if (k == 0) {
-    message("k is estimated to be 0. You may not need to remove unwanted variance...\n")
-    message("It is also possible that something failed and you will need to manually specify k for RUV...\n")
+    message("k is estimated to be 0. You may not need to remove unwanted variance...")
+    message("It is also possible that something failed and you will need to manually specify k for RUV...")
   }
   else {
     message(paste0("k is estimated to be: ", k))
