@@ -5,7 +5,7 @@
 #' @param dat      A data matrix where loci are rows and samples are columns
 #' @param mod    A model matrix used to fit the data (variables of interest)
 #' @param method    The method used to estimate k ("leek" (default - asymptotic) or "be" (permutation-based))
-#' @param vfilter    Specify the number of genes to filter based on ranked variance across samples (default is to use all genes)
+#' @param vfilter    Specify the number of loci to filter based on ranked variance across samples (default is to use all loci)
 #' @param B    Specify the number of permutations to use if method = "be" (default = 20)
 #' @param seed    Specify a random number for setting the seed if method = "be"
 #' 
