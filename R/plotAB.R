@@ -7,8 +7,8 @@
 #' @param ylim      Y-axis limits (default is -1 to 1)
 #' @param unitarize   Should the data be unitarized?
 #' @param reverse    Reverse the sign of the PC values?
-#' @param top.col    Open chromatin color to be plotted
-#' @param bot.col    Closed chromatin color to be plotted
+#' @param top.col    Top (pos. PC values) chromatin color to be plotted
+#' @param bot.col    Bottom (neg. PC values) chromatin color to be plotted
 #' 
 #' @return    invisibly, the compartment estimates from the plot
 #' 

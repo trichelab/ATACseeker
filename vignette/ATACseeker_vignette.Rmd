@@ -1,0 +1,68 @@
+---
+title: "ATACseeker_vignette"
+author: "Ben Johnson"
+date: "7/21/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Load in the libraries
+
+```{r loadlibs}
+
+library(GenomicRanges)
+library(Homo.sapiens)
+library(mixOmics)
+
+```
+
+```{r loaddata}
+
+#Load in some test counts
+GSE74310.counts <- read.delim("~/Downloads/GSE74310_scATACseq_All_Counts.txt", header = T, check.names = F, stringsAsFactors = F)
+
+```
+
+```{r testAB}
+
+#Convert to granges
+gr <- with(GSE74310.counts[,1:3], GRanges(Chr, IRanges(Start, End)))
+
+#Subset into cell types
+lmpp <- GSE74310.counts[,grepl("LMPP", colnames(GSE74310.counts))]
+mono <- GSE74310.counts[,grepl("mono", colnames(GSE74310.counts))]
+su70_leuk <- GSE74310.counts[,grepl("SU070", colnames(GSE74310.counts)) & grepl("Leuk", colnames(GSE74310.counts))]
+su70_lsc <- GSE74310.counts[,grepl("SU070-LSC", colnames(GSE74310.counts))]
+su353_blast <- GSE74310.counts[,grepl("SU353-Blast", colnames(GSE74310.counts))]
+su353_lsc <- GSE74310.counts[,grepl("SU353-LSC", colnames(GSE74310.counts))]
+
+all_data <- list(lmpp = lmpp,
+                 mono = mono,
+                 su70_leuk = su70_leuk,
+                 su70_lsc = su70_lsc,
+                 su353_blast = su353_blast,
+                 su353_lsc = su353_lsc)
+
+#Bin matrix chr13
+bin.chr13 <- lapply(all_data, getBinMatrix, gr, chr = "chr13")
+
+#Calc eigenvalue correlations
+bin.chr13.cor <- lapply(bin.chr1, getCorMatrix)
+
+#Get AB signal
+bin.chr13.ab <- lapply(bin.chr1.cor, getABSignal)
+
+#Plot AB signal
+par(mar=c(1,1,1,1))
+par(mfrow=c(6,1))
+plotAB(bin.chr1.ab$lmpp$pc, ylim = c(-0.1, 0.1), unitarize = T)
+plotAB(bin.chr1.ab$mono$pc, ylim = c(-0.1, 0.1), unitarize = T)
+plotAB(bin.chr1.ab$su70_lsc$pc, ylim = c(-0.1, 0.1), unitarize = T)
+plotAB(bin.chr1.ab$su353_lsc$pc, ylim = c(-0.1, 0.1), unitarize = T)
+plotAB(bin.chr1.ab$su70_leuk$pc, ylim = c(-0.1, 0.1), unitarize = T)
+plotAB(bin.chr1.ab$su353_blast$pc, ylim = c(-0.1, 0.1), unitarize = T)
+
+```
