@@ -25,15 +25,11 @@ approximation to solve the missing species problem.
 Original functions in preseqR v2.0.1.1 for this were:
 preseqR.rfa.curve and preseqR.rfa.species.accum.curve
 
-The new functions as of the version 3.1.2 are:
+The new functions as of the version 4.0.0 are:
 
-ds.mincount == preseqR.rfa.curve
-ds.mincount.bootstrap == preseqR.rfa.species.accum.curve
+ds.rSAC == preseqR.rfa.curve
+ds.rSAC.bootstrap == preseqR.rfa.species.accum.curve
 
 The new functions return generators that can have data passed to them
 instead of returning a data frame as in version 2.0.1.1.
-
-It is worth noting that these functions return *non-bootstrapped* 
-fragment estimates but uses the bootstrapped variance estimates to 
-calculate CI. This is a function of the latest implementation of preseqR.
 }
