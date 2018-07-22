@@ -9,7 +9,7 @@ getABSignal(x, k = 2, iter = 2)
 \arguments{
 \item{x}{A list object from getCorMatrix}
 
-\item{k}{Bin size for smoothing (default = 2)}
+\item{k}{Value of k for smoothing (default = 2)}
 
 \item{iter}{Number of iterations for moving average smoothing (default = 2)}
 }
