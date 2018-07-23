@@ -6,7 +6,7 @@
 #' 
 #' @return    A list object to pass to getABSignal
 #' 
-#' @import    GRanges
+#' @import    GenomicRanges
 #' 
 #' @export 
 
