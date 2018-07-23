@@ -18,9 +18,9 @@ plotAB(x, main = "", ylim = c(-1, 1), unitarize = FALSE,
 
 \item{reverse}{Reverse the sign of the PC values?}
 
-\item{top.col}{Open chromatin color to be plotted}
+\item{top.col}{Top (pos. PC values) chromatin color to be plotted}
 
-\item{bot.col}{Closed chromatin color to be plotted}
+\item{bot.col}{Bottom (neg. PC values) chromatin color to be plotted}
 }
 \value{
 invisibly, the compartment estimates from the plot

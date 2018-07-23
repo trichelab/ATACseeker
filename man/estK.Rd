@@ -13,7 +13,7 @@ estK(dat, mod, method = "leek", vfilter = NULL, B = 20, seed = 777)
 
 \item{method}{The method used to estimate k ("leek" (default - asymptotic) or "be" (permutation-based))}
 
-\item{vfilter}{Specify the number of genes to filter based on ranked variance across samples (default is to use all genes)}
+\item{vfilter}{Specify the number of loci to filter based on ranked variance across samples (default is to use all loci)}
 
 \item{B}{Specify the number of permutations to use if method = "be" (default = 20)}
 
