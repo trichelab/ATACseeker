@@ -24,10 +24,15 @@
 
 ruvNorm <- function(x, mod, cIdx, k = "estimate", scIdx, round = TRUE, epsilon = 1, tolerance = 1e-8, isLog = FALSE, ...) {
   if (k == "estimate") {
-    if (!class(mod) == "model.matrix") {
-      stop("mod needs to be a model.matrix object...")
+    if (!class(mod) == "matrix") {
+      stop("mod needs to be a model.matrix...")
     }
     k <- estK(dat = x, mod = mod, ...)
+  }
+  if (!is.null(rownames(x))) {
+    message("Row names don't exist for your input...")
+    message("Generating sequential row names...")
+    rownames(x) <- seq(1:nrow(x))
   }
   #TODO: make the scIdx generation automated
   message("Removing unwanted variance...")
