@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#A/B compartment calling with ATACseeker
+A/B compartment estimation from ATAC- and scATAC-seq data is integral to understanding gross chromatin conformation between/within sample types
 ##Load in the libraries
 
 ```{r loadlibs}
@@ -16,10 +18,58 @@ knitr::opts_chunk$set(echo = TRUE)
 library(GenomicRanges)
 library(Homo.sapiens)
 library(mixOmics)
+library(rtracklayer)
+library(plyr)
+library(dplyr)
+
+```
+
+```{r QC}
+
+#Load the bams
+
+#Load the blacklist
+blacklist <- import(system.file("extdata/blacklists/hg19.blacklist.ENCFF001TDO.bed.gz", package = "ATACseeker"), genome = "hg19")
+
+#Import bams
+#Read in the phenotype data
+#pdata <- read.delim("~/Git_Repos/ATACseeker/inst/extdata/bulkATACexampleBAMs/bulkAtacCovariates.csv", check.names = F, stringsAsFactors = F, row.names = 1, sep = ",")
+pdata <- read.delim("~/Git_Repos/ATACseeker/inst/extdata/scATACexampleBAMs/phenotype_info.txt", check.names = F, stringsAsFactors = F)
+
+#Subset 10 cells for each cell type
+blasts <- pdata %>% group_by(cell_type) %>% filter(cell_type == "blast cell") %>% filter(donor.id == "SU353") %>% sample_n(., size = 10)
+lsc <- pdata %>% group_by(cell_type) %>% filter(cell_type == "LSC") %>% filter(donor.id == "SU353") %>% sample_n(., size = 10)
+naiveT <- pdata %>% group_by(cell_type) %>% filter(cell_type == "Naive T cell") %>% filter(donor.id == "control") %>% sample_n(., size = 10)
+memT <- pdata %>% group_by(cell_type) %>% filter(cell_type == "Memory T cell") %>% filter(donor.id == "control") %>% sample_n(., size = 10)
+th17T <- pdata %>% group_by(cell_type) %>% filter(cell_type == "Th17 T cell") %>% filter(donor.id == "control") %>% sample_n(., size = 10)
+sub_data <- as.data.frame(rbind(blasts, lsc, naiveT, memT, th17T))
+
+bams <- lapply(paste0("/Volumes/projects_secondary/triche/Noor/bulkATAC/", pdata$BAM), ATACseeker:::atacPairedEnd, genome = "hg19")
+
+#Calculate complexity
+bam.ests <- lapply(bams, getEsts, withCI = T)
 
 ```
 
 ```{r loaddata}
+
+#Roadmap epigenomics DNase peaks file
+peakfile <- system.file("extdata/dnasePeaks/REMC_blood_regions_merged.hg19.bed.gz", package = "ATACseeker") # blood peaks
+
+#Import the peaks for counting up reads that fall within these regions
+peaks <- getPeaks(peakfile, sort_peaks = TRUE) #This will give a warning saying the peaks are of unequal width
+
+#Read in the bam files for the three cell types (10 cells per cell type)
+pdat <- read.csv("~/Git_Repos/ATACseeker/inst/extdata/scATACexampleBAMs/combined_scATAC_runs.csv", row=1)
+pdat$BAM <- paste0(rownames(pdat), ".hg19.bam")
+rownames(pdat) <- pdat$BAM
+keep <- pdat$BAM %in% test
+pdat <- pdat[keep,]
+pdat <- pdat[!(pdat$status == "Sezary syndrome"),]
+pdat <- pdat[which(pdat$donor.id == "control" | pdat$donor.id == "SU070" | pdat$donor.id == "SU353"),]
+system.time(frags <- getCounts(pdat$BAM, peaks, paired = T, colData=pdat)) # ~ 15 mins
+colnames(frags) <- frags$title
+count_data <- as.matrix(assay(frags))
 
 #Load in some test counts
 GSE74310.counts <- read.delim("~/Downloads/GSE74310_scATACseq_All_Counts.txt", header = T, check.names = F, stringsAsFactors = F)
@@ -28,41 +78,45 @@ GSE74310.counts <- read.delim("~/Downloads/GSE74310_scATACseq_All_Counts.txt", h
 
 ```{r testAB}
 
-#Convert to granges
-gr <- with(GSE74310.counts[,1:3], GRanges(Chr, IRanges(Start, End)))
-
 #Subset into cell types
-lmpp <- GSE74310.counts[,grepl("LMPP", colnames(GSE74310.counts))]
-mono <- GSE74310.counts[,grepl("mono", colnames(GSE74310.counts))]
-su70_leuk <- GSE74310.counts[,grepl("SU070", colnames(GSE74310.counts)) & grepl("Leuk", colnames(GSE74310.counts))]
-su70_lsc <- GSE74310.counts[,grepl("SU070-LSC", colnames(GSE74310.counts))]
-su353_blast <- GSE74310.counts[,grepl("SU353-Blast", colnames(GSE74310.counts))]
-su353_lsc <- GSE74310.counts[,grepl("SU353-LSC", colnames(GSE74310.counts))]
+naiveT <- pdat[which(pdat$title %in% colnames(count_data) & pdat$cell_type == "Naive T cell"),]
+memT <- pdat[which(pdat$title %in% colnames(count_data) & pdat$cell_type == "Memory T cell"),]
+th17T <- pdat[which(pdat$title %in% colnames(count_data) & pdat$cell_type == "Th17 T cell"),]
 
-all_data <- list(lmpp = lmpp,
-                 mono = mono,
-                 su70_leuk = su70_leuk,
-                 su70_lsc = su70_lsc,
-                 su353_blast = su353_blast,
-                 su353_lsc = su353_lsc)
+naiveT.counts <- count_data[,which(naiveT$title %in% colnames(count_data))]
+memT.counts <- count_data[,which(memT$title %in% colnames(count_data))]
+th17T.counts <- count_data[,which(th17T$title %in% colnames(count_data))]
+su70_blast.counts <- count_data[,grepl("SU070", colnames(count_data)) & grepl("Leuk", colnames(count_data))]
+su70_lsc.counts <- count_data[,grepl("SU070-LSC", colnames(count_data))]
+su353_blast.counts <- count_data[,grepl("SU353-Blast", colnames(count_data))]
+su353_lsc.counts <- count_data[,grepl("SU353-LSC", colnames(count_data))]
 
-#Bin matrix chr13
-bin.chr13 <- lapply(all_data, getBinMatrix, gr, chr = "chr13")
+all_data <- list(naiveT = naiveT.counts,
+                 memT = memT.counts,
+                 th17T = th17T.counts,
+                 su70_blast = su70_blast.counts,
+                 su70_lsc = su70_lsc.counts,
+                 su353_blast = su353_blast.counts,
+                 su353_lsc = su353_lsc.counts)
+
+#Bin matrix chr1
+bin.chr1 <- lapply(all_data, getBinMatrix, frags, chr = "chr1", res = 100000)
 
 #Calc eigenvalue correlations
-bin.chr13.cor <- lapply(bin.chr1, getCorMatrix)
+bin.chr1.cor <- lapply(bin.chr1, getCorMatrix)
 
 #Get AB signal
-bin.chr13.ab <- lapply(bin.chr1.cor, getABSignal)
+bin.chr1.ab <- lapply(bin.chr1.cor, getABSignal)
 
 #Plot AB signal
 par(mar=c(1,1,1,1))
-par(mfrow=c(6,1))
-plotAB(bin.chr1.ab$lmpp$pc, ylim = c(-0.1, 0.1), unitarize = T)
-plotAB(bin.chr1.ab$mono$pc, ylim = c(-0.1, 0.1), unitarize = T)
-plotAB(bin.chr1.ab$su70_lsc$pc, ylim = c(-0.1, 0.1), unitarize = T)
-plotAB(bin.chr1.ab$su353_lsc$pc, ylim = c(-0.1, 0.1), unitarize = T)
-plotAB(bin.chr1.ab$su70_leuk$pc, ylim = c(-0.1, 0.1), unitarize = T)
-plotAB(bin.chr1.ab$su353_blast$pc, ylim = c(-0.1, 0.1), unitarize = T)
+par(mfrow=c(7,1))
+plotAB(bin.chr1.ab$naiveT$pc, ylim = c(-0.2, 0.2), unitarize = T)
+plotAB(bin.chr1.ab$memT$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "goldenrod")
+plotAB(bin.chr1.ab$th17T$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "darkblue")
+plotAB(bin.chr1.ab$su70_lsc$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "red")
+plotAB(bin.chr1.ab$su353_lsc$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "black")
+plotAB(bin.chr1.ab$su70_blast$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "cyan")
+plotAB(bin.chr1.ab$su353_blast$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "seagreen")
 
 ```
