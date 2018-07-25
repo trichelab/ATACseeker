@@ -24,7 +24,7 @@
 
 ruvNorm <- function(x, mod, cIdx, k = "estimate", scIdx, round = TRUE, epsilon = 1, tolerance = 1e-8, isLog = FALSE, ...) {
   if (k == "estimate") {
-    if (!class(mod) == "matrix") {
+    if (!class(mod) == "model.matrix") {
       stop("mod needs to be a model.matrix object...")
     }
     k <- estK(dat = x, mod = mod, ...)
