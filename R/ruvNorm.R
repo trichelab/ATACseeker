@@ -29,10 +29,11 @@ ruvNorm <- function(x, mod, cIdx, k = "estimate", scIdx, round = TRUE, epsilon =
     }
     k <- estK(dat = x, mod = mod, ...)
   }
-  if (!is.null(rownames(x)) {
-      message("Row names don't exist for your input...")
-      message("Generating sequential row names...")
-      rownames(x) <- seq(1:nrow(x)) 
+  if (!is.null(rownames(x))) {
+    message("Row names don't exist for your input...")
+    message("Generating sequential row names...")
+    rownames(x) <- seq(1:nrow(x))
+  }
   #TODO: make the scIdx generation automated
   message("Removing unwanted variance...")
   ruv.out <- RUVs(x = x, cIdx = rownames(x), k = k, scIdx = scIdx, round = round, epsilon = epsilon, tolerance = tolerance, isLog = isLog)

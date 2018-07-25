@@ -8,6 +8,10 @@
 #'
 #' @return  a GenomicAlignmentPairs object
 #'
+#' @import GenomicRanges
+#'
+#' @export
+#'
 #' @examples
 #' \dontrun{
 #'
