@@ -1,6 +1,7 @@
 #' Generate bins for A/B compartment estimation
 #'
-#' Generate bins across a user defined chromosome for A/B compartment estimation
+#' Generate bins across a user defined chromosome for A/B compartment estimation.
+#' A/B compartment estimation can be used for non-supported genomes if chr.end is set.
 #' 
 #' This function is used to generate a list object to be passed to getCorMatrix
 #'
@@ -11,28 +12,39 @@
 #' @param chr.end    End position (in bp) to be analyzed
 #' @param res    Binning resolution (in bp)
 #' @param FUN    Function to be used to summarize information within a bin
+#' @param genome    Genome corresponding to the input data ("hg19" or "mm10")
 #' 
 #' @return    A list object to pass to getCorMatrix
 #' 
-#' @import    GRanges
+#' @import    GenomicRanges
 #' @import    Homo.sapiens
+#' @import    Mus.musculus
 #' 
 #' @export 
 
-getBinMatrix <- function(x, genloc, chr = "chr1", chr.start = 0, chr.end = NULL, res = 100000, FUN=sum){
+getBinMatrix <- function(x, genloc, chr = "chr1", chr.start = 0, chr.end = NULL, res = 100000, FUN=sum, genome = c("hg19", "mm10")){
   
   if (any(is.na(x))){
     stop("Matrix must not contain NAs")
   }
   if (nrow(x)!=length(genloc)){
-    stop("Provided granges must have length equal to the matrix number of rows")
+    stop("Provided GRanges must have length equal to the matrix number of rows")
   }
   
   if (is.null(chr.end)) {
-    chr.end <- seqlengths(Homo.sapiens)[chr]
+    if (genome == "hg19" | genome == "mm10") {
+      genome <- match.arg(genome)
+      chr.end <- switch(genome,
+                        hg19 = seqlengths(Homo.sapiens)[chr],
+                        mm10 = seqlengths(Mus.musculus)[chr])
+    }
+    else {
+      message(paste0("Don't know what to do with ", genome))
+      stop("If you'd like to use an unsupported genome, specify chr.end to an appropriate value...")
+    }
   }
   start <- seq(chr.start, chr.end, res) #Build the possible bin ranges given resolution
-  end <- c(start[-1], chr.end) - 1L #If no end specified, set to -1 to get full chromosome
+  end <- c(start[-1], chr.end) - 1L #Set the end ranges for desired resolution
   
   #Build up the genomic ranges object given chr, start, end, and resolution
   gr.bin <- GRanges(seqnames = chr,
@@ -43,7 +55,7 @@ getBinMatrix <- function(x, genloc, chr = "chr1", chr.start = 0, chr.end = NULL,
   
   #Get the number of bins overlapping loci
   n <- length(gr.bin)
-  message(paste0(n, " bins are created..."))
+  message(paste0(n, " bins created..."))
   
   #User defined function to summarize data in the bins
   #TODO: allow for bin matrices to be generated for all chrs

@@ -12,7 +12,7 @@
 #' 
 #' @return    invisibly, the compartment estimates from the plot
 #' 
-#' @import    GRanges
+#' @import    GenomicRanges
 #' 
 #' @export 
 

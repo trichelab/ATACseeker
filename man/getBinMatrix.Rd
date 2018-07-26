@@ -5,7 +5,7 @@
 \title{Generate bins for A/B compartment estimation}
 \usage{
 getBinMatrix(x, genloc, chr = "chr1", chr.start = 0, chr.end = NULL,
-  res = 1e+05, FUN = sum)
+  res = 1e+05, FUN = sum, genome = c("hg19", "mm10"))
 }
 \arguments{
 \item{x}{A p x n matrix where p (rows) = loci and n (columns) = samples/cells}
@@ -21,12 +21,15 @@ getBinMatrix(x, genloc, chr = "chr1", chr.start = 0, chr.end = NULL,
 \item{res}{Binning resolution (in bp)}
 
 \item{FUN}{Function to be used to summarize information within a bin}
+
+\item{genome}{Genome corresponding to the input data ("hg19" or "mm10")}
 }
 \value{
 A list object to pass to getCorMatrix
 }
 \description{
-Generate bins across a user defined chromosome for A/B compartment estimation
+Generate bins across a user defined chromosome for A/B compartment estimation.
+A/B compartment estimation can be used for non-supported genomes if chr.end is set.
 }
 \details{
 This function is used to generate a list object to be passed to getCorMatrix
