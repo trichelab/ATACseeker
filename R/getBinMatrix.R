@@ -14,7 +14,7 @@
 #' 
 #' @return    A list object to pass to getCorMatrix
 #' 
-#' @import    GRanges
+#' @import    GenomicRanges
 #' @import    Homo.sapiens
 #' 
 #' @export 

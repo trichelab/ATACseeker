@@ -8,7 +8,7 @@
 #' 
 #' @return    A list x to pass to getABSignal
 #' 
-#' @import    GRanges
+#' @import    GenomicRanges
 #' @import    mixOmics
 #' 
 #' @export 
