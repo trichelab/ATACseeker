@@ -1,6 +1,3 @@
-## This is a package that attempts to QC ATACseq libraries 
+# ATACseeker: A toolkit for ATAC- and scATAC-seq analysis
 
-and it does some smoothing etc. in preparation for feeding the coverage to 
-either the 'derFinder' or 'csaw' Bioconductor packages, since I don't feel like
-reinventing the wheel.  Fitting a mixture model for nucleosome occupancy, etc.
-are secondary objectives and will be dealt with as the need arises.
+ATACseeker can work on both bulk ATAC-seq and scATAC-seq data. Prior to analysis with ATACseeker the data from GSE74912 were pre-processed using BWA mem and samblaster (to mark duplicates). The data were aligned to hg19. Once BAMs have been generated, they are good to go for analysis with ATACseeker.
