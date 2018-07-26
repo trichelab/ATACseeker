@@ -8,6 +8,7 @@ Maintainer: Tim Triche, Jr. <tim.triche@gmail.com>
 Description: Some ATACseq tools
 Depends:
     Homo.sapiens,
+    Mus.musculus,
     VariantAnnotation,
     VariantTools,
     rtracklayer, 
