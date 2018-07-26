@@ -106,7 +106,7 @@ all_data <- list(naiveT = naiveT.counts,
                  su353_lsc = su353_lsc.counts)
 
 #Bin matrix chr1
-bin.chr1 <- lapply(all_data, getBinMatrix, frags, chr = "chr1", res = 100000)
+bin.chr1 <- lapply(all_data, getBinMatrix, frags, chr = "chr1", res = 100000, genome = "hg19")
 
 #Calc eigenvalue correlations
 bin.chr1.cor <- lapply(bin.chr1, getCorMatrix)
