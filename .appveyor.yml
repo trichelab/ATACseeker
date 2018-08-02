@@ -32,6 +32,7 @@ environment:
     _R_CHECK_FORCE_SUGGESTS_: false
 
 build_script:
+  - travis-tool.sh install_bioc BiocGenerics Biostrings csaw GenomicAlignments GenomicRanges Homo.sapiens IRanges Mus.musculus Repitools Rsamtools rtracklayer S4Vectors SummarizedExperiment VariantAnnotation VariantTools
   - travis-tool.sh install_deps
 
 test_script:
