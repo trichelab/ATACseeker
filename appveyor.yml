@@ -25,15 +25,18 @@ environment:
     R_ARCH: x64
     BIOC_USE_DEVEL: false
     _R_CHECK_FORCE_SUGGESTS_: false
+    GCC_PATH: mingw_64
 
   - R_VERSION: release
     R_ARCH: x64
     BIOC_USE_DEVEL: true
     _R_CHECK_FORCE_SUGGESTS_: false
+    GCC_PATH: mingw_64
 
 build_script:
   - travis-tool.sh install_bioc BiocGenerics Biostrings csaw GenomicAlignments GenomicRanges Homo.sapiens IRanges Mus.musculus Repitools Rsamtools rtracklayer S4Vectors SummarizedExperiment VariantAnnotation VariantTools
   - travis-tool.sh install_deps
+  - travis-tool.sh install_r XML
 
 test_script:
   - travis-tool.sh run_tests
