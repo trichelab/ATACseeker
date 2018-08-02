@@ -21,4 +21,4 @@ notifications:
 
 env:
  global:
-- _R_CHECK_TIMINGS_="0"
+ - _R_CHECK_TIMINGS_="0"
