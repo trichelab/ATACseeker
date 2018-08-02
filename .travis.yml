@@ -5,6 +5,8 @@ warnings_are_errors: false
 sudo: false
 #cache: packages #for dependencies 
 
+script: true
+
 r_packages:
  - covr #codecov shows how many lines in package are tested
 
