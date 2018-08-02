@@ -1,8 +1,8 @@
 Package: ATACseeker
 Type: Package
 Title: Utilities for ATACseq QC, differential accessibility, and integration
-Version: 0.9.54
-Date: 2018-06-15
+Version: 0.9.55
+Date: 2018-07-31
 Author: Tim Triche, Jr., Asif Zubair, Ben Johnson
 Maintainer: Tim Triche, Jr. <tim.triche@gmail.com>
 Description: Some ATACseq tools
@@ -21,15 +21,16 @@ Depends:
 Imports:
     IRanges,
     jsonlite,
-    chromVAR,
     Rsamtools,
     Repitools, 
     S4Vectors,
     Biostrings,
-    motifmatchr,
     BiocGenerics,
     GenomicRanges,
     GenomicAlignments,
     SummarizedExperiment
+Suggests:
+    chromVAR,
+    motifmatchr
 License: Artistic
 RoxygenNote: 6.0.1
