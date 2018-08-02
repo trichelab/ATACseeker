@@ -34,9 +34,9 @@ environment:
     GCC_PATH: mingw_64
 
 build_script:
+  - travis-tool.sh install_r XML
   - travis-tool.sh install_bioc BiocGenerics Biostrings csaw GenomicAlignments GenomicRanges Homo.sapiens IRanges Mus.musculus Repitools Rsamtools rtracklayer S4Vectors SummarizedExperiment VariantAnnotation VariantTools
   - travis-tool.sh install_deps
-  - travis-tool.sh install_r XML
 
 test_script:
   - travis-tool.sh run_tests
