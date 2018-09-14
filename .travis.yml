@@ -1,24 +1,37 @@
 language: r
 
+cache: packages
 r: bioc-devel
 warnings_are_errors: false
 sudo: false
-#cache: packages #for dependencies 
+
+script: true
 
 r_packages:
  - covr #codecov shows how many lines in package are tested
+
+bioc_packages:
+ - BiocCheck
+ - Homo.sapiens
+ - Mus.musculus
+ - VariantAnnotation
+ - VariantTools
+ - rtracklayer
 
 r_build_args: "--no-manual --no-resave-data"
 r_check_args: "--no-build-vignettes --no-manual --timings"
 
 after_success:
  - Rscript -e 'library(covr); codecov()'
+ - R CMD BiocCheck .
 
 notifications:
  email:
+   recipients:
+    - ben.johnson@vai.org
    on_success: change
-   on_failure: change
+   on_failure: always
 
 env:
  global:
-- _R_CHECK_TIMINGS_="0"
+ - _R_CHECK_TIMINGS_="0"
