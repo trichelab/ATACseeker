@@ -11,6 +11,9 @@ fragPlot(frag.dists, label)
 
 \item{label}{the group label to be used in the title}
 }
+\value{
+invisibly return fragment lengths and plot
+}
 \description{
 Plot fragment size density for a set of samples.
 }

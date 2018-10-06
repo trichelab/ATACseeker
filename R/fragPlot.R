@@ -5,6 +5,10 @@
 #'
 #' @seealso fragmentLengths
 #' 
+#' @return invisibly return fragment lengths and plot
+#' 
+#' @import IRanges
+#' 
 #' @export
 fragPlot <- function(frag.dists, label) {
   dens.max <- max(do.call(c, lapply(frag.dists, `[[`, "y")))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/processUcscCytoband.R
 \name{processUcscCytoband}
 \alias{processUcscCytoband}
-\title{utility function to pull in UCSC cytoband / arm files 
+\title{utility function to pull in UCSC cytoband / arm files
 this is then applied to the mcols() of a GRanges or GAlignmentPairs
 and then one can trivially parallelize over cytobands or arms with split()}
 \usage{
@@ -15,7 +15,7 @@ processUcscCytoband(filename)
 a GRanges with $chrArm and $chrBand as mcols
 }
 \description{
-utility function to pull in UCSC cytoband / arm files 
+utility function to pull in UCSC cytoband / arm files
 this is then applied to the mcols() of a GRanges or GAlignmentPairs
 and then one can trivially parallelize over cytobands or arms with split()
 }
