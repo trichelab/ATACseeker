@@ -3,8 +3,8 @@ Type: Package
 Title: Utilities for ATACseq QC, differential accessibility, and integration
 Version: 0.99.0
 Date: 2018-10-05
-Author: Tim Triche, Jr., Asif Zubair, Ben Johnson
-Maintainer: Tim Triche, Jr. <tim.triche@gmail.com>
+Author: Tim Triche, Jr. [aut, cre], Asif Zubair [aut, cre], Noor Sohail [aut, cre], Benjamin K Johnson [aut, cre]
+Maintainer: Benjamin K Johnson <ben.johnson@vai.org>
 Description: ATAC-seq tools for QC, differential accessibility, and integration
 biocViews: Genetics, Epigenetics, ATACSeq
 Depends: R (>= 3.5.0)
