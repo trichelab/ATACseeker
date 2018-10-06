@@ -3,6 +3,8 @@
 #' @param x     coverage
 #' @param gr    a single GRange
 #' @param ...   args to pass along to plotCoverage
+#' 
+#' @return    wrapper for plotting stranded coverage plots
 #'
 #' @import GenomicRanges
 #'

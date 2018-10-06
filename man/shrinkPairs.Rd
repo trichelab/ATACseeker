@@ -12,7 +12,8 @@ shrinkPairs(x, shrinkBy)
 \item{shrinkBy}{shrink by this many bases}
 }
 \value{
-the input object, widths shrunken by shrinkBy bases
+\preformatted{     the input object, widths shrunken by shrinkBy bases
+}
 }
 \description{
 This seems to work better than anything else for "shifting" cuts

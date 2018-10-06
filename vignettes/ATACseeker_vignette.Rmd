@@ -1,8 +1,19 @@
 ---
 title: "ATACseeker_vignette"
 author: "Ben Johnson"
-date: "7/21/2018"
-output: html_document
+title: "ATAC-seq QC and analysis with ATACseeker"
+author: "Ben Johnson"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('ATACseeker')`" 
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    toc_float: true
+    fig_width: 5
+vignette: >
+  %\VignetteIndexEntry{ATAC-seq QC and analysis with ATACseeker}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding[utf8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +26,7 @@ ATACseeker can work on both bulk ATAC-seq and scATAC-seq data. Prior to analysis
 
 The development version of ATACseeker can be installed using devtools.
 
-```{r installATACseeker}
+```{r installATACseeker, eval = FALSE}
 
 library(devtools)
 install_github("trichelab/ATACseeker")
@@ -27,18 +38,17 @@ Load in the libraries.
 ```{r loadlibs}
 
 library(ATACseeker)
-library(chromVAR) #This is used to get counts within regions for AB compartment calling - not explicitly needed since we can also extract counts from csaw
 library(edgeR)
 
 ```
 
 We can run a couple of random quality control metrics on our aligned data. Note that we don't actually load in the BAMs here since they are quite large, though we do load in some phenotype data so we can see what that looks like.
 
-```{r QC}
+```{r QC, eval = FALSE}
 
 #Import bams
 #Read in some example phenotype data
-pdata <- read.delim(system.file("extdata/bulkATACexampleBAMs/bulkAtacCovariates.csv", package = "ATACseeker"), check.names = F, stringsAsFactors = F, row.names = 1, sep = ",")
+pdata <- read.delim(system.file("extdata/bulkATACexampleBAMs/bulkAtacCovariates.csv", package = "ATACseeker"), check.names = FALSE, stringsAsFactors = FALSE, row.names = 1, sep = ",")
 
 #Import the bams
 bams <- lapply(paste0("/path/to/your/bam/files", pdata$BAM), atacPairedEnd, genome = "hg19")
@@ -53,77 +63,7 @@ seqinfo(chr20) <- seqinfo(Homo.sapiens)[seqlevels(chr20)]
 plotCoverage(bams[[1]], chr20)
 
 #Calculate complexity using rational function approximation, including 95% confidence intervals
-bam.ests <- lapply(bams, getEsts, withCI = T)
-
-```
-
-We can also go directly to AB compartment calling (A: open chromatin; B: closed chromatin). Here we import some DNase data from Roadmap Epigeneomics relating to blood data.
-
-```{r scATACimport}
-
-#Roadmap epigenomics DNase peaks file
-#Import the peaks for counting up reads that fall within these regions
-peaks <- getPeaks(system.file("extdata/dnasePeaks/REMC_blood_regions_merged.hg19.bed.gz", package = "ATACseeker"), sort_peaks = TRUE) #This will give a warning saying the peaks are of unequal width
-
-#Read in some example scATAC-seq phenotype information
-pdat <- read.delim(system.file("extdata/scATACexampleBAMs/phenotype_info.txt", package = "ATACseeker"), stringsAsFactors = F, check.names = F)
-pdat$BAM <- paste0(rownames(pdat), ".hg19.bam")
-rownames(pdat) <- pdat$BAM
-
-#Get read counts within peaks using chromVAR
-system.time(frags <- getCounts(pdat$BAM, peaks, paired = T, colData=pdat))
-colnames(frags) <- frags$title
-genome(frags) <- "hg19"
-
-#Convert to a matrix
-count_data <- as.matrix(assay(frags))
-
-```
-
-Now we can subset by cell-type and call compartments.
-
-```{r ABcalling}
-
-#Subset into cell types
-naiveT <- pdat[which(pdat$title %in% colnames(count_data) & pdat$cell_type == "Naive T cell"),]
-memT <- pdat[which(pdat$title %in% colnames(count_data) & pdat$cell_type == "Memory T cell"),]
-th17T <- pdat[which(pdat$title %in% colnames(count_data) & pdat$cell_type == "Th17 T cell"),]
-
-naiveT.counts <- count_data[,which(naiveT$title %in% colnames(count_data))]
-memT.counts <- count_data[,which(memT$title %in% colnames(count_data))]
-th17T.counts <- count_data[,which(th17T$title %in% colnames(count_data))]
-su70_blast.counts <- count_data[,grepl("SU070", colnames(count_data)) & grepl("Leuk", colnames(count_data))]
-su70_lsc.counts <- count_data[,grepl("SU070-LSC", colnames(count_data))]
-su353_blast.counts <- count_data[,grepl("SU353-Blast", colnames(count_data))]
-su353_lsc.counts <- count_data[,grepl("SU353-LSC", colnames(count_data))]
-
-all_data <- list(naiveT = naiveT.counts,
-                 memT = memT.counts,
-                 th17T = th17T.counts,
-                 su70_blast = su70_blast.counts,
-                 su70_lsc = su70_lsc.counts,
-                 su353_blast = su353_blast.counts,
-                 su353_lsc = su353_lsc.counts)
-
-#Bin matrix chr1
-bin.chr1 <- lapply(all_data, getBinMatrix, frags, chr = "chr1", res = 100000, genome = "hg19")
-
-#Calc eigenvalue correlations
-bin.chr1.cor <- lapply(bin.chr1, getCorMatrix)
-
-#Get AB signal
-bin.chr1.ab <- lapply(bin.chr1.cor, getABSignal)
-
-#Plot AB signal
-par(mar=c(1,1,1,1))
-par(mfrow=c(7,1))
-plotAB(bin.chr1.ab$naiveT$pc, ylim = c(-0.2, 0.2), unitarize = T)
-plotAB(bin.chr1.ab$memT$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "goldenrod")
-plotAB(bin.chr1.ab$th17T$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "darkblue")
-plotAB(bin.chr1.ab$su70_lsc$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "red")
-plotAB(bin.chr1.ab$su353_lsc$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "black")
-plotAB(bin.chr1.ab$su70_blast$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "cyan")
-plotAB(bin.chr1.ab$su353_blast$pc, ylim = c(-0.2, 0.2), unitarize = T, top.col = "seagreen")
+bam.ests <- lapply(bams, getEsts, withCI = TRUE)
 
 ```
 
@@ -174,7 +114,7 @@ EDASeq::plotPCA(ruvN$normalizedCounts, col=colors[trt], main="Normalized PCA",
 
 Differential accessibility calling is performed using csaw's hybrid window approach and region-level FDR control.
 
-```{r csaw}
+```{r csaw, eval = FALSE}
 
 #Load the blacklist
 blacklist <- import(system.file("extdata/blacklists/hg19.blacklist.ENCFF001TDO.bed.gz", package = "ATACseeker"), genome = "hg19")
@@ -224,10 +164,10 @@ mod <- model.matrix(~factor(pdata$fraction) + ruvN$W) #Incorporate the normaliza
 y <- asDGEList(filtered.data)
 
 #Estimate dispersions
-y <- estimateDisp(y, mod, robust = T)
+y <- estimateDisp(y, mod, robust = TRUE)
 
 #Fit
-fit <- glmQLFit(y, design, robust = T)
+fit <- glmQLFit(y, design, robust = TRUE)
 
 #Differential accessibility testing for the third coefficient in the mod object
 results <- glmQLFTest(fit, coef = 3)

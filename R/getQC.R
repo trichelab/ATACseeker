@@ -4,6 +4,9 @@
 #' @param pe.bam  the name of the BAM file
 #'
 #' @return a list with components "qc" (metrics) and "frag.dist" (density)
+#' 
+#' @import csaw
+#' @import BiocGenerics
 #'
 #' @export
 getQC <- function(name, pe.bam) {
