@@ -11,7 +11,7 @@ getComplexity <- function(x) {
   if (!'seen' %in% names(x)) x <- getFeatureCounts(x)
   freq <- seq_len(max(range(x$seen)))
   breaks <- c(0, freq)
-  d <- data.frame(freq=freq, species=hist(x$seen, breaks=breaks, plot=F)$counts)
+  d <- data.frame(freq=freq, species=hist(x$seen, breaks=breaks, plot=FALSE)$counts)
 #  d <- d[ which(d[,2] != 0), ] 
   return(data.matrix(d))
 

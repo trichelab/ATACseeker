@@ -13,6 +13,9 @@ plotStranded(x, gr, ...)
 
 \item{...}{args to pass along to plotCoverage}
 }
+\value{
+wrapper for plotting stranded coverage plots
+}
 \description{
 convenience function
 }

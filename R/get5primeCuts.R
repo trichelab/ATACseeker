@@ -14,6 +14,7 @@
 #' CUX1bump <- GRanges('chr7', IRanges(101499132, 101501052), '+')
 #'
 #' @import GenomicAlignments
+#' @import IRanges
 #' 
 #' @export
 get5primeCuts <- function(galp, maxSize=1000, shrink=TRUE, shrinkBy=NULL, ...) {

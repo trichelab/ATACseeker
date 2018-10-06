@@ -4,9 +4,10 @@
 #' @param   plotAs  hist[ogram, default], density, or none 
 #' @param   ...     other arguments to pass along to density()
 #'
-#' @return          (invisibly) the width of fragments in galp
+#' @return    (invisibly) the width of fragments in galp
 #'
 #' @import GenomicAlignments
+#' @import BiocGenerics
 #'
 #' @export 
 fragmentLengths <- function(galp, plotAs=c('hist','density','none'), ...){

@@ -14,7 +14,8 @@ getEsts(xx, withCI = FALSE, ...)
 \item{...}{Other arguments to pass on to preseqR}
 }
 \value{
-A data frame with results
+\preformatted{   A data frame with results
+}
 }
 \description{
 Estimate the complexity of a library or sample based on unique fragments

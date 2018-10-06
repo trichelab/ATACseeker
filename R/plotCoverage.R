@@ -11,8 +11,13 @@
 #' @param kf        kernel function for smoothing (normal)
 #' @param ...       arguments to pass along to coverage() 
 #' 
-#' @examples visualizing a specific enhancer:
-#'
+#' @return invisibly return coverage and plot
+#' 
+#' @examples 
+#' #visualizing a specific enhancer:
+#' library(GenomicRanges)
+#' library(Mus.musculus)
+#' 
 #' SMOenh <- GRanges('chr6', IRanges(29744702, 29751934), '+')
 #' seqinfo(SMOenh) <- seqinfo(Mus.musculus)[seqlevels(SMOenh)]
 #'
@@ -22,10 +27,11 @@
 #' plotCoverage(get5primeCuts(galp, shrink=FALSE), SMOenh, stranded=TRUE)
 #'
 #' @import GenomicRanges
+#' @import S4Vectors
 #'
 #' @export 
 plotCoverage <- function(x, gr, col="violet", xlab="base", ylab="reads", 
-                         main="Coverage", stranded=F, smoothen=0, kf='normal',
+                         main="Coverage", stranded=FALSE, smoothen=0, kf='normal',
                          ...) {
 
   if(length(gr) > 1) {

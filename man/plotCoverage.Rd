@@ -5,7 +5,7 @@
 \title{utility fn from Patrick Abouyoun's 2010 seminar}
 \usage{
 plotCoverage(x, gr, col = "violet", xlab = "base", ylab = "reads",
-  main = "Coverage", stranded = F, smoothen = 0, kf = "normal", ...)
+  main = "Coverage", stranded = FALSE, smoothen = 0, kf = "normal", ...)
 }
 \arguments{
 \item{x}{a galp}
@@ -28,11 +28,16 @@ plotCoverage(x, gr, col = "violet", xlab = "base", ylab = "reads",
 
 \item{...}{arguments to pass along to coverage()}
 }
+\value{
+invisibly return coverage and plot
+}
 \description{
 utility fn from Patrick Abouyoun's 2010 seminar
 }
 \examples{
-visualizing a specific enhancer:
+#visualizing a specific enhancer:
+library(GenomicRanges)
+library(Mus.musculus)
 
 SMOenh <- GRanges('chr6', IRanges(29744702, 29751934), '+')
 seqinfo(SMOenh) <- seqinfo(Mus.musculus)[seqlevels(SMOenh)]

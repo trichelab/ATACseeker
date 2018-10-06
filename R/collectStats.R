@@ -5,6 +5,9 @@
 #' 
 #' @return          the output of csaw::profileSites after massaging inputs
 #'
+#' @import csaw
+#' @import SummarizedExperiment
+#'
 #' @export
 collectStats <- function(curbam, pe.param) { 
   wcnt <- windowCounts(curbam, spacing=50, width=50, param=pe.param, filter=20)
