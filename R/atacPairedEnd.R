@@ -8,6 +8,14 @@
 #'
 #' @return  a GenomicAlignmentPairs object
 #'
+#' @import GenomicRanges
+#' @import Rsamtools
+#' @import GenomicAlignments
+#' @import Homo.sapiens
+#' @import Mus.musculus
+#'
+#' @export
+#'
 #' @examples
 #' \dontrun{
 #'

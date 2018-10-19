@@ -12,7 +12,8 @@ collectStats(curbam, pe.param)
 \item{pe.param}{paired end parameters, derived elsewhere}
 }
 \value{
-the output of csaw::profileSites after massaging inputs
+\preformatted{     the output of csaw::profileSites after massaging inputs
+}
 }
 \description{
 collect various cross-correlation and window size stats for QC

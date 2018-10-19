@@ -15,7 +15,7 @@
 #' @export
 plotComplexity <- function(x, ..., ests=NULL, withCI=FALSE) {
   if (!is.null(ests)) { 
-    if (withCI & !all(c("frags.lower","frags.upper") %in% names(ests))) {
+    if (withCI & !all(c("lb","ub") %in% names(ests))) {
       stop("CIs requested, but provided estimates do not contain them!")
     }
     message("Using supplied estimates...")
@@ -34,11 +34,11 @@ plotComplexity <- function(x, ..., ests=NULL, withCI=FALSE) {
     message("Plotting complexity curve", 
            ifelse(withCI, " with confidence intervals...", "..."))
     if (withCI) { 
-      epsilon <- 1000000 #Think this is just an offset for plotting?
+      epsilon <- 1000000
       ggplot(res, aes(x = reads/epsilon, y = frags/epsilon)) +
         geom_line() +
         geom_point() +
-        geom_ribbon(aes(ymin = frags.lower/epsilon, ymax = frags.upper/epsilon, alpha = 0.2)) +
+        geom_ribbon(aes(ymin = lb/epsilon, ymax = ub/epsilon, alpha = 0.2)) +
         geom_vline(xintercept = res$reads[1]/epsilon, linetype = "dashed") + #Add a line for existing library complexity
         xlab("Read depth (M)") +
         ylab("Unique fragments (M)") +
@@ -48,7 +48,7 @@ plotComplexity <- function(x, ..., ests=NULL, withCI=FALSE) {
         )
     } 
     else {
-      epsilon <- 1000000 #Think this is just an offset for plotting?
+      epsilon <- 1000000
       ggplot(res, aes(x = reads/epsilon, y = frags/epsilon)) +
         geom_line() +
         geom_point() +

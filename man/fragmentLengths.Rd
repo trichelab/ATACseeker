@@ -9,7 +9,7 @@ fragmentLengths(galp, plotAs = c("hist", "density", "none"), ...)
 \arguments{
 \item{galp}{the GAlignmentPairs object}
 
-\item{plotAs}{hist[ogram, default], density, or none}
+\item{plotAs}{hist\link{ogram, default}, density, or none}
 
 \item{...}{other arguments to pass along to density()}
 }

@@ -1,0 +1,195 @@
+---
+title: "ATACseeker_vignette"
+author: "Ben Johnson"
+title: "ATAC-seq QC and analysis with ATACseeker"
+author: "Ben Johnson"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('ATACseeker')`" 
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    toc_float: true
+    fig_width: 5
+vignette: >
+  %\VignetteIndexEntry{ATAC-seq QC and analysis with ATACseeker}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# ATACseeker: A toolkit for ATAC- and scATAC-seq analysis
+
+ATACseeker can work on both bulk ATAC-seq and scATAC-seq data. Prior to analysis with ATACseeker the data from GSE74912 were pre-processed using BWA mem and samblaster (to mark duplicates). The data were aligned to hg19. Once BAMs have been generated, they are good to go for analysis with ATACseeker.
+
+The development version of ATACseeker can be installed using devtools.
+
+```{r installATACseeker, eval = FALSE}
+
+library(devtools)
+install_github("trichelab/ATACseeker")
+
+```
+
+Load in the libraries.
+
+```{r loadlibs}
+
+library(ATACseeker)
+library(edgeR)
+
+```
+
+We can run a couple of random quality control metrics on our aligned data. Note that we don't actually load in the BAMs here since they are quite large, though we do load in some phenotype data so we can see what that looks like.
+
+```{r QC, eval = FALSE}
+
+#Import bams
+#Read in some example phenotype data
+pdata <- read.delim(system.file("extdata/bulkATACexampleBAMs/bulkAtacCovariates.csv", package = "ATACseeker"), check.names = FALSE, stringsAsFactors = FALSE, row.names = 1, sep = ",")
+
+#Import the bams
+bams <- lapply(paste0("/path/to/your/bam/files", pdata$BAM), atacPairedEnd, genome = "hg19")
+
+#Run a couple random QC metrics
+#Fragment length distribution for PE data
+fragmentLengths(bams[[1]], plotAs = "density")
+
+#Coverage of CEBPB gene body and promoter region
+chr20 <- GRanges('chr20', IRanges(48804120, 48809227), "+")
+seqinfo(chr20) <- seqinfo(Homo.sapiens)[seqlevels(chr20)]
+plotCoverage(bams[[1]], chr20)
+
+#Calculate complexity using rational function approximation, including 95% confidence intervals
+bam.ests <- lapply(bams, getEsts, withCI = TRUE)
+
+```
+
+Here we have an option to normalize our background filtered data derived from csaw (shown below) using RUVSeq. We have automated the process of estimating a value of k (number of factors of "unwanted variation" to remove). However, if the number of factors is known a priori, a specific value of k can be specified.
+
+```{r ruvnorm}
+
+#load in filtered data
+load(system.file("extdata/csawExampleData/csaw_global_filtered.RData", package = "ATACseeker"))
+counts <- assay(filtered.data)
+colnames(counts) <- colData(filtered.data)$bam.files
+#Adding rownames is *key* for RUVs to run
+#ruvNorm will add arbitrary names if no rownames are added
+#The ranges are more informative
+rownames(counts) <- paste0(ranges(filtered.data))
+
+#Add the patient metadata info
+pdata$patient <- factor(gsub("\\-.*", "", pdata$sample))
+mod <- model.matrix(~factor(pdata$fraction) + pdata$patient)
+
+#Generate some colors for plotting
+library(RColorBrewer)
+colors <- brewer.pal(3, "Dark2")
+trt <- factor(pdata$fraction)
+
+#Plot pre-norm data
+#Uses the EDASeq package for plotting but any package that does PCA can be used
+EDASeq::plotPCA(counts, col=colors[trt], main="No Normalization PCA", 
+                labels=FALSE, pch=19, size = 14)
+
+#RUV norm
+#Build the scIdx matrix
+#Each row corresponds to the index of a column (e.g. sample group) in counts
+#The -1 value is used as padding if sample numbers are not equal among groups
+scIdx <- matrix(nrow = 3, ncol = 6)
+scIdx[1,] <- c(3, 5, 8, 12, -1, -1)
+scIdx[2,] <- c(1, 6, 9, 13, -1, -1)
+scIdx[3,] <- c(2, 4, 7, 10, 11, 14)
+
+#Normalize using the estimated value of k
+ruvN <- ruvNorm(counts, cIdx = rownames(counts), mod = mod, scIdx = scIdx)
+
+#Plot post-norm data
+EDASeq::plotPCA(ruvN$normalizedCounts, col=colors[trt], main="Normalized PCA", 
+                labels=FALSE, pch=19, cex = 2)
+
+```
+
+Differential accessibility calling is performed using csaw's hybrid window approach and region-level FDR control.
+
+```{r csaw, eval = FALSE}
+
+#Load the blacklist
+blacklist <- import(system.file("extdata/blacklists/hg19.blacklist.ENCFF001TDO.bed.gz", package = "ATACseeker"), genome = "hg19")
+
+#BAM filter params
+#For all standard chromosomes in human
+#standard.chr <- paste0("chr", c(seq(1,22), X, Y)
+#Restricted here to chr1
+standard.chr <- "chr1"
+load.bam.params <- readParam(minq = 20, dedup = TRUE, BPPARAM = MulticoreParam(16), discard = blacklist, restrict = standard.chr, pe = "both")
+
+#Load bams from bulk ATAC-seq phenotype data from above
+bams.load <- pdata$BAM
+
+#Can estimate insert sizes
+pesize <- getPESizes(bams.load[1], param = load.bam.params)
+
+#Calculate cross-correlation to determine fragment length if using single-end data
+x <- correlateReads(bam.files, param=load.bam.params)
+frag.len <- maximizeCcf(x)
+frag.len
+
+#Add the ext = frag.len option to the windowCounts function if using SE data
+data <- windowCounts(bams.load, width = 150, param = load.bam.params)
+
+#Bin 1kb windows for background filtering
+binned <- windowCounts(bams.load, bin = TRUE, width = 1000, param = load.bam.params)
+filter.stat <- filterWindows(data, background = binned, type = "global")
+
+#Keep regions with counts greater than log2(3)
+keep <- filter.stat$filter > log2(3)
+
+#Plot to see if the above cutoff is reasonable
+hist(filter.stat$back.abundances, xlab = "Adjusted bin log-CPM", breaks = 50, main = "")
+global.bg <- filter.stat$abundances - filter.stat$filter
+abline(v=global.bg[1], col = "red", lwd = 2)
+abline(v=global.bg[1]+log2(3), col = "blue", lwd = 2)
+legend("topright", lwd=2, col=c('red', 'blue'), legend=c("Background", "Threshold"))
+
+#Filter the data if the above cutoff looks reasonable
+filtered.data <- data[keep,] #Can be used in ruvNorm prior to differential accessibility testing
+
+#Calculate differential accesibility
+mod <- model.matrix(~factor(pdata$fraction) + ruvN$W) #Incorporate the normalization factors derived using ruvNorm
+
+#Convert to a DGEList object
+y <- asDGEList(filtered.data)
+
+#Estimate dispersions
+y <- estimateDisp(y, mod, robust = TRUE)
+
+#Fit
+fit <- glmQLFit(y, design, robust = TRUE)
+
+#Differential accessibility testing for the third coefficient in the mod object
+results <- glmQLFTest(fit, coef = 3)
+
+#Merge windows
+merged <- mergeWindows(rowRanges(filtered.data), tol = 100, max.width = 5000)
+
+#Use the region-level FDR control
+#Combined test
+tabcom <- combineTests(merged$id, results$table)
+#Best test - see csaw documentation for explanation of differences between tests
+tabbest <- getBestTest(merged$id, results$table)
+
+#Set an FDR cutoff of 0.05
+is.sig <- tabcom$FDR < 0.05
+
+#Annotate the significant ranges
+anno <- detailRanges(merged$region, txdb = Homo.sapiens, orgdb = Homo.sapiens)
+combined <- data.frame(as.data.frame(merged$region)[,1:3], tabcom,
+                       best.pos = mid(ranges(rowRanges(filtered.data[tabbest$best]))), 
+                       best.logFC = tabbest$logFC,  anno)
+
+#Can go on to intersect with known DNase peaks, etc.
+
+```
