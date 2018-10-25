@@ -2,49 +2,41 @@
 #' in a paired-end ATACseq run (i.e., the majority of ATACseq studies)
 #'
 #' @param bam       character string, the BAM file to parse
-#' @param genome    optional character string, the genome assembly to target
-#' @param bamParams optional any parameters to pass through to ScanBamParam
-#' @param which     optional a GRanges object with specific regions to extract
+#' @param bamParams optional parameters to pass through to ScanBamParam (none)
+#' @param which     optional GRanges with specific regions to extract (all)
 #'
 #' @return  a GenomicAlignmentPairs object
 #'
-#' @import GenomicRanges
-#' @import Rsamtools
 #' @import GenomicAlignments
+#' @import GenomicRanges
 #' @import Homo.sapiens
 #' @import Mus.musculus
-#'
-#' @export
+#' @import Rsamtools
 #'
 #' @examples
 #' \dontrun{
 #'
 #' data(cytobands_hg19)
+#' library(Homo.sapiens)
 #' del7q <- byBand(cytobands_hg19)$chr7q22.1
 #' galp <- atacPairedEnd('chr7.q10.CD49f_r1.hg19.bam', which=del7q)
-#'
-#' library(Mus.musculus)
-#' SMO <- transcriptsBy(Mus.musculus, 'gene')[['319757']]
-#' galp <- atacPairedEnd('A1.SMO.bam', which=SMO)
 #'
 #' library(Mus.musculus)
 #' chr6 <- GRanges('chr6', IRanges(1, seqlengths(Mus.musculus)['chr6']), '*')
 #' galp <- atacPairedEnd("A2.mm10.unique.bam",
 #'                       bamParams=properPairedEndAtacFilters(which=chr6))
+#'
 #' }
-atacPairedEnd <- function(bam, genome=c("hg19","mm10"), bamParams=NULL, which=NULL, ...) {
+#'
+#' @export
+atacPairedEnd <- function(bam, bamParams=NULL, which=NULL, ...) {
 
-  getStdChromGRanges <- function(x) {
-    ## ONLY works if chromosomes are properly ordered as in OrganismDbi
-    as(seqinfo(x), "GRanges")[ 1:(which(seqlevels(x) == "chrM") - 1) ] 
-  }
 
   if(is.null(bamParams)) {
     if (is.null(which)) {
-      genome <- match.arg(genome)
-      which <- switch(genome,
-                      hg19 = getStdChromGRanges(Homo.sapiens),
-                      mm10 = getStdChromGRanges(Mus.musculus))
+      bf <- BamFile(bam) # pull in the index too 
+      sl <- grep("(_|chrM|MT)", invert=TRUE, value=TRUE, seqlevels(bf))
+      which <- as(seqinfo(bf)[sl], "GRanges")
     } 
     bamParams <- properPairedEndAtacFilters(which=which, ...)
   }

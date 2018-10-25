@@ -7,6 +7,7 @@
 #' @export
 getComplexity <- function(x) {
 
+  message("Warning: this function will (usually) fail on single-cell ATAC data")
   if (is(x, 'GAlignmentPairs')) x <- getFeatureCounts(as(x, 'GRanges'))
   if (!'seen' %in% names(x)) x <- getFeatureCounts(x)
   freq <- seq_len(max(range(x$seen)))

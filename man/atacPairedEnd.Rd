@@ -5,17 +5,14 @@
 \title{pull in (filter and assemble as an object) some or all of the "useful" reads
 in a paired-end ATACseq run (i.e., the majority of ATACseq studies)}
 \usage{
-atacPairedEnd(bam, genome = c("hg19", "mm10"), bamParams = NULL,
-  which = NULL, ...)
+atacPairedEnd(bam, bamParams = NULL, which = NULL, ...)
 }
 \arguments{
 \item{bam}{character string, the BAM file to parse}
 
-\item{genome}{optional character string, the genome assembly to target}
+\item{bamParams}{optional parameters to pass through to ScanBamParam (none)}
 
-\item{bamParams}{optional any parameters to pass through to ScanBamParam}
-
-\item{which}{optional a GRanges object with specific regions to extract}
+\item{which}{optional GRanges with specific regions to extract (all)}
 }
 \value{
 a GenomicAlignmentPairs object
@@ -28,16 +25,15 @@ in a paired-end ATACseq run (i.e., the majority of ATACseq studies)
 \dontrun{
 
 data(cytobands_hg19)
+library(Homo.sapiens)
 del7q <- byBand(cytobands_hg19)$chr7q22.1
 galp <- atacPairedEnd('chr7.q10.CD49f_r1.hg19.bam', which=del7q)
-
-library(Mus.musculus)
-SMO <- transcriptsBy(Mus.musculus, 'gene')[['319757']]
-galp <- atacPairedEnd('A1.SMO.bam', which=SMO)
 
 library(Mus.musculus)
 chr6 <- GRanges('chr6', IRanges(1, seqlengths(Mus.musculus)['chr6']), '*')
 galp <- atacPairedEnd("A2.mm10.unique.bam",
                       bamParams=properPairedEndAtacFilters(which=chr6))
+
 }
+
 }

@@ -5,7 +5,8 @@
 \title{utility fn from Patrick Abouyoun's 2010 seminar}
 \usage{
 plotCoverage(x, gr, col = "violet", xlab = "base", ylab = "reads",
-  main = "Coverage", stranded = FALSE, smoothen = 0, kf = "normal", ...)
+  main = "Coverage", stranded = FALSE, smoothen = 0, kf = "normal",
+  ...)
 }
 \arguments{
 \item{x}{a galp}

@@ -4,7 +4,8 @@
 \alias{get5primeCuts}
 \title{get the 5' cut sites from a GAlignmentPairs (usually of an ATAC BAM)}
 \usage{
-get5primeCuts(galp, maxSize = 1000, shrink = TRUE, shrinkBy = NULL, ...)
+get5primeCuts(galp, maxSize = 1000, shrink = TRUE, shrinkBy = NULL,
+  ...)
 }
 \arguments{
 \item{galp}{a GAlignmentPairs object}
