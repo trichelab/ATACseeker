@@ -4,8 +4,8 @@
 \alias{ruvNorm}
 \title{Remove unwanted variance (RUV)}
 \usage{
-ruvNorm(x, mod, cIdx, k = "estimate", scIdx, round = TRUE, epsilon = 1,
-  tolerance = 1e-08, isLog = FALSE, ...)
+ruvNorm(x, mod, cIdx, k = "estimate", scIdx, round = TRUE,
+  epsilon = 1, tolerance = 0.00000001, isLog = FALSE, ...)
 }
 \arguments{
 \item{x}{A data matrix where loci are rows and samples are columns}
